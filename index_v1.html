@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>你好,這是 Kaiser's GitHub Page</title>
+    <link rel="icon" type="image/x-icon" href="img/face_laugh_wink_icon3.ico">
+    <style>
+      body {
+        background-color: black;
+        color: white;
+        margin: 0;
+        padding: 0;
+      }
+      a {
+        color: LightBlue;
+      }
+      .header {
+        position: relative;
+        height: 120px;
+        overflow: hidden;
+      }
+      .header h1 {
+        position: absolute;
+        z-index: 2;
+        margin: 0;
+        padding: 20px;
+        left: 20px;
+        top: 50%;
+        transform: translateY(-50%);
+      }
+      .animation-container {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 100px;
+        z-index: 1;
+      }
+      .floor {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 2px;
+        background-color: white;
+        box-shadow: 0 2px 0 white;
+      }
+      .animal {
+        position: absolute;
+        height: 75%; /* 75% of original 50px height */
+        width: auto;
+        bottom: 2px; /* Align with the floor */
+        opacity: 0; /* Initially transparent */
+      }
+      .content {
+        padding: 20px;
+      }
+      .spaceLa {
+        margin-left: 60px;
+      }
+      .spaceLh {
+        margin-left: 30px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="header">
+      <h1>覺得厲害</h1>
+      <div class="animation-container" id="animationContainer">
+        <div class="floor"></div>
+        <!-- Animals will be added here by JavaScript -->
+      </div>
+    </div>
+    <div class="content">
+      <!-- The rest of your content remains the same -->
+    </div>
+
+    <script>
+      const animals = [
+        {src: "img/colab_cute/MANEKI.gif", alt: "吉祥物maneki"},
+        {src: "img/colab_cute/KINAKO.gif", alt: "吉祥物kinako"},
+        {src: "img/colab_cute/crab.gif", alt: "吉祥物crab"},
+        {src: "img/colab_cute/MIDNIGHT.gif", alt: "吉祥物midnight"},
+        {src: "img/colab_cute/FIREFOX.gif", alt: "吉祥物firefox"},
+        {src: "img/colab_cute/STRIPES.gif", alt: "吉祥物stripes"},
+        {src: "img/colab_cute/chocolatechip.gif", alt: "吉祥物chocolatechip"},
+        {src: "img/colab_cute/redvelvet.gif", alt: "吉祥物redvelvet"},
+        {src: "img/colab_cute/oreo2.gif", alt: "吉祥物oreo2"},
+      ];
+
+      function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [array[i], array[j]] = [array[j], array[i]];
+        }
+      }
+
+      function addAnimal() {
+        const container = document.getElementById('animationContainer');
+        const currentAnimals = container.querySelectorAll('.animal');
+        
+        if (currentAnimals.length >= 5) {
+          return; // Don't add more if there are already 5 animals
+        }
+
+        const animalIndex = Math.floor(Math.random() * animals.length);
+        const animal = animals[animalIndex];
+        const img = document.createElement('img');
+        img.src = animal.src;
+        img.alt = animal.alt;
+        img.className = 'animal';
+
+        const startLeft = Math.random() < 0.5; // 50% chance to start from left
+        const duration = 30 + Math.random() * 15; // 30 to 45 seconds
+
+        img.style.left = startLeft ? '-50px' : 'calc(100% + 50px)';
+        img.style.transform = startLeft ? 'scaleX(-1)' : 'scaleX(1)';
+
+        container.appendChild(img);
+
+        setTimeout(() => {
+          img.style.opacity = '1';
+          img.style.transition = `opacity 1s, left ${duration}s linear, transform 0.5s`;
+          
+          if (startLeft) {
+            img.style.left = 'calc(100% + 50px)';
+          } else {
+            img.style.left = '-50px';
+          }
+        }, 100);
+
+        // Flip the animal when it reaches the edge
+        const flipInterval = setInterval(() => {
+          if ((startLeft && img.offsetLeft >= container.offsetWidth) ||
+              (!startLeft && img.offsetLeft <= -50)) {
+            clearInterval(flipInterval);
+            img.style.transform = startLeft ? 'scaleX(1)' : 'scaleX(-1)';
+            
+            setTimeout(() => {
+              img.style.left = startLeft ? '-50px' : 'calc(100% + 50px)';
+            }, 500);
+
+            // Remove the animal after it exits
+            setTimeout(() => {
+              container.removeChild(img);
+              addAnimal(); // Add a new animal to replace this one
+            }, duration * 1000);
+          }
+        }, 100);
+      }
+
+      function startAnimation() {
+        shuffleArray(animals);
+        for (let i = 0; i < 5; i++) {
+          setTimeout(addAnimal, i * 3000); // Add an animal every 3 seconds
+        }
+        setInterval(addAnimal, 15000); // Try to add a new animal every 15 seconds
+      }
+
+      // Start the animation when the page loads
+      window.onload = startAnimation;
+    </script>
+    <h1 class="spaceLh">Coding Python</h1>
+    <p>
+      <a href="https://github.com/kaiserchang/speech_recognition" class="spaceLa" target="_blank">
+        即時語音辨識＆翻譯(免費)- Python (終端機輸出&視窗版)
+     </a>
+   </p>
+   <p>
+      <a href="https://github.com/kaiserchang/NsrDjango" class="spaceLa" target="_blank">
+        即時語音辨識＆翻譯(免費)- Django (線上網頁程式版)
+     </a> 
+   </p>
+
+   <h1 class="spaceLh">Machine Learning</h1>
+   <p>
+      <a href="https://kaiserchang.github.io/MachineLearning/aiclassroom/iris_visualization_3d_default.html" class="spaceLa" target="_blank">
+      Iris Dataset Visualization 
+     </a>
+   </p>
+
+   <h1 class="spaceLh">影片作品集 Portfolio </h1>
+   <p>
+      <a href="https://youtu.be/TAqA0ARfHJk" class="spaceLa" target="_blank"> 2D Compositing & Color Grading Works </a>
+   </p>
+   <p>
+      <a href="https://youtu.be/c9crxZddrxo" class="spaceLa" target="_blank"> 3D Works </a>
+   </p>
+   <p>
+   </p>
+   <p>
+    <br>
+    <br>
+    <br>
+    <hr>
+    </p>
+ </body>
+</html>

@@ -1,0 +1,257 @@
+<html><head>
+<meta charset="UTF-8">
+<title>美麗立體Logo動畫 - 升級版14.0</title>
+<style>
+/* 設置全局樣式 */
+body {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background-color: #000;
+}
+
+/* 設置容器樣式 */
+#container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    perspective: 400px; /* 增加整體視角效果 */
+}
+
+/* 設置Logo樣式 */
+#logo {
+    position: absolute;
+    top: 50%;
+    right: 40%;
+    transform: translate(50%, -50%);
+    width: 100px;
+    height: 100px;
+    transform-style: preserve-3d;
+    cursor: pointer;
+}
+
+/* 設置Logo內部立方體樣式 */
+.cube {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform 0.05s linear; /* 添加過渡效果，但時間縮短以提高反應速度 */
+}
+
+/* 設置立方體的每個面的樣式 */
+.face {
+    position: absolute;
+    width: 100px;
+    height: 100px;
+    background: linear-gradient(45deg, rgba(0,255,255,0.5), rgba(0,128,128,0.5));
+    border: 2px solid rgba(255,255,255,0.3);
+    box-shadow: 0 0 10px rgba(255,255,255,0.5);
+    opacity: 0.6;
+    backface-visibility: visible; /* 讓背面可見，增強透視效果 */
+}
+
+/* 設置立方體每個面的位置，調整以增強透視效果 */
+.front  { transform: rotateY(0deg) translateZ(50px); }
+.back   { transform: rotateY(180deg) translateZ(50px); }
+.right  { transform: rotateY(90deg) translateZ(50px); }
+.left   { transform: rotateY(-90deg) translateZ(50px); }
+.top    { transform: rotateX(90deg) translateZ(50px); }
+.bottom { transform: rotateX(-90deg) translateZ(50px); }
+
+/* 設置粒子樣式 */
+.particle {
+    position: absolute;
+    background-color: rgba(255,255,255,0.7);
+    border-radius: 50%;
+    transition: transform 0.5s ease-out;
+}
+
+/* 設置小粒子樣式 */
+.particle.small {
+    width: 3px;
+    height: 3px;
+}
+
+/* 設置大粒子樣式 */
+.particle.large {
+    width: 7px;
+    height: 7px;
+}
+
+/* 設置對話記錄樣式 */
+#conversation {
+    position: fixed;
+    bottom: 10px;
+    left: 10px;
+    right: 10px;
+    height: 150px;
+    background-color: rgba(0,0,0,0.7);
+    color: white;
+    overflow-y: auto;
+    padding: 10px;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    border-radius: 5px;
+}
+</style>
+</head>
+<body>
+<!-- 創建容器元素 -->
+<div id="container">
+    <!-- 創建Logo元素 -->
+    <div id="logo">
+        <div class="cube">
+            <div class="face front"></div>
+            <div class="face back"></div>
+            <div class="face right"></div>
+            <div class="face left"></div>
+            <div class="face top"></div>
+            <div class="face bottom"></div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+// 創建粒子函數
+function createParticle() {
+    const particle = document.createElement('div');
+    particle.classList.add('particle');
+    
+    // 隨機決定粒子大小
+    if (Math.random() < 0.7) {
+        particle.classList.add('small');
+    } else {
+        particle.classList.add('large');
+    }
+    
+    // 設置粒子的初始位置
+    const x = Math.random() * window.innerWidth;
+    const y = window.innerHeight;
+    
+    particle.style.left = `${x}px`;
+    particle.style.top = `${y}px`;
+    
+    document.getElementById('container').appendChild(particle);
+    
+    // 粒子上升動畫
+    let position = y;
+    const speed = Math.random() * 0.5 + 1;
+    let offsetX = 0;
+    
+    const animation = setInterval(() => {
+        position -= speed;
+        
+        // 檢查粒子是否接近Logo並計算偏移量
+        const offset = checkCollision(particle, position);
+        offsetX += offset.x;
+        
+        // 更新粒子位置，包括X軸偏移
+        particle.style.transform = `translate(${offsetX}px, 0)`;
+        particle.style.top = `${position}px`;
+        
+        // 如果粒子超出視窗頂部，則移除粒子
+        if (position < 0) {
+            clearInterval(animation);
+            particle.remove();
+        }
+    }, 20);
+}
+
+// 檢查粒子是否接近Logo並計算偏移量
+function checkCollision(particle, position) {
+    const logo = document.getElementById('logo');
+    const logoRect = logo.getBoundingClientRect();
+    const particleRect = particle.getBoundingClientRect();
+    
+    const collisionRange = 100;
+    
+    if (particleRect.left < logoRect.right + collisionRange &&
+        particleRect.right > logoRect.left - collisionRange &&
+        particleRect.top < logoRect.bottom + collisionRange &&
+        particleRect.bottom > logoRect.top - collisionRange) {
+        
+        const logoCenterX = logoRect.left + logoRect.width / 2;
+        const logoCenterY = logoRect.top + logoRect.height / 2;
+        const particleCenterX = particleRect.left + particleRect.width / 2;
+        const particleCenterY = particleRect.top + particleRect.height / 2;
+        
+        const dx = particleCenterX - logoCenterX;
+        const dy = particleCenterY - logoCenterY;
+        
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        const repelForce = 1 - (distance / (collisionRange + Math.max(logoRect.width, logoRect.height) / 2));
+        
+        const offsetX = dx * repelForce * 0.1;
+        
+        return { x: offsetX };
+    }
+    
+    return { x: 0 };
+}
+
+// 每隔一段時間創建新粒子
+setInterval(createParticle, 100);
+
+// 滑鼠互動功能
+const logo = document.getElementById('logo');
+let isDragging = false;
+let previousMousePosition = { x: 0, y: 0 };
+let rotationX = 0;
+let rotationY = 0;
+let autoRotationAnimationId;
+
+// 自動旋轉函數
+function autoRotate() {
+    // 加快自動旋轉速度
+    rotationY += 0.75; // 原來是 0.5，現在增加 50%
+    rotationX += 0.45; // 原來是 0.3，現在增加 50%
+    updateCubeRotation();
+    autoRotationAnimationId = requestAnimationFrame(autoRotate);
+}
+
+// 更新立方體旋轉
+function updateCubeRotation() {
+    const cube = logo.querySelector('.cube');
+    cube.style.transform = `rotateX(${rotationX}deg) rotateY(${rotationY}deg)`;
+}
+
+// 滑鼠按下事件處理
+logo.addEventListener('mousedown', (e) => {
+    isDragging = true;
+    previousMousePosition = { x: e.clientX, y: e.clientY };
+    cancelAnimationFrame(autoRotationAnimationId);
+});
+
+// 滑鼠移動事件處理
+document.addEventListener('mousemove', (e) => {
+    if (!isDragging) return;
+
+    const deltaX = e.clientX - previousMousePosition.x;
+    const deltaY = e.clientY - previousMousePosition.y;
+
+    rotationY += deltaX * 0.5;
+    rotationX -= deltaY * 0.5;
+
+    updateCubeRotation();
+
+    previousMousePosition = { x: e.clientX, y: e.clientY };
+});
+
+// 滑鼠釋放事件處理
+document.addEventListener('mouseup', () => {
+    isDragging = false;
+    // 立即恢復自動旋轉
+    autoRotate();
+});
+
+// 立即開始自動旋轉
+autoRotate();
+
+</script>
+
+</body>
+</html>

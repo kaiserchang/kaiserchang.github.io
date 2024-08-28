@@ -1,0 +1,291 @@
+<html><head><base href="https://gist.githubusercontent.com/curran/a08a1080b88344b0c8a7/raw/0e7a9b0a5d22642a06d3d5b9bcbad9890c8ee534/iris.csv">
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+    body { 
+        font-family: 'Roboto', sans-serif; 
+        background-color: #4A4A4A;
+        margin: 0; 
+        padding: 20px; 
+        color: #ffffff;
+    }
+    .container { 
+        display: flex; 
+        max-width: 1200px; 
+        margin: 0 auto; 
+        background-color: #333333;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        overflow: hidden;
+    }
+    .sidebar { 
+        width: 280px; 
+        padding: 20px; 
+        background-color: #2c3e50; 
+        color: white;
+        overflow-y: auto;
+        max-height: 800px;
+    }
+    .main { 
+        flex-grow: 1; 
+        padding: 20px;
+    }
+    .chart { 
+        width: 100%; 
+        height: 600px; 
+        background-color: #333333;
+        border-radius: 5px; 
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2); 
+    }
+    h1 { 
+        color: #ffffff;
+        text-align: center;
+        margin-bottom: 30px;
+        font-weight: 700;
+    }
+    h2 { 
+        color: #ecf0f1; 
+        margin-bottom: 20px;
+        font-weight: 400;
+    }
+    select, button, input { 
+        width: 100%; 
+        margin-bottom: 15px; 
+        padding: 10px; 
+        border: none;
+        border-radius: 5px;
+        background-color: #34495e;
+        color: white;
+        font-size: 14px;
+        transition: background-color 0.3s ease;
+    }
+    select:hover, button:hover {
+        background-color: #4a6885;
+    }
+    button {
+        cursor: pointer;
+        background-color: #3498db;
+    }
+    button:hover {
+        background-color: #2980b9;
+    }
+    .control-group {
+        margin-bottom: 20px;
+    }
+    label {
+        display: block;
+        margin-bottom: 5px;
+        color: #ecf0f1;
+    }
+    .checkbox-group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    .checkbox-group label {
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+    }
+    .checkbox-group input[type="checkbox"] {
+        margin-right: 5px;
+        width: auto;
+    }
+    .dimension-toggle {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 20px;
+    }
+    .dimension-toggle button {
+        width: auto;
+        padding: 10px 20px;
+        margin: 0 10px;
+    }
+    .active {
+        background-color: #2980b9;
+    }
+    #error-message {
+        color: #e74c3c;
+        text-align: center;
+        margin-top: 20px;
+        font-weight: bold;
+    }
+</style>
+</head>
+<body>
+<h1>Interactive Iris Dataset Visualization</h1>
+<div class="dimension-toggle">
+    <button id="toggle-2d" class="active">2D View</button>
+    <button id="toggle-3d">3D View</button>
+</div>
+<div class="container">
+    <div class="sidebar">
+        <h2>Controls</h2>
+        <div class="control-group">
+            <label for="x-axis">X-Axis:</label>
+            <select id="x-axis">
+                <option value="sepal_length">Sepal Length</option>
+                <option value="sepal_width">Sepal Width</option>
+                <option value="petal_length">Petal Length</option>
+                <option value="petal_width">Petal Width</option>
+            </select>
+        </div>
+        <div class="control-group">
+            <label for="y-axis">Y-Axis:</label>
+            <select id="y-axis">
+                <option value="sepal_width">Sepal Width</option>
+                <option value="sepal_length">Sepal Length</option>
+                <option value="petal_length">Petal Length</option>
+                <option value="petal_width">Petal Width</option>
+            </select>
+        </div>
+        <div class="control-group" id="z-axis-group" style="display: none;">
+            <label for="z-axis">Z-Axis:</label>
+            <select id="z-axis">
+                <option value="petal_width">Petal Width</option>
+                <option value="sepal_length">Sepal Length</option>
+                <option value="sepal_width">Sepal Width</option>
+                <option value="petal_length">Petal Length</option>
+            </select>
+        </div>
+        <div class="control-group">
+            <label>Species Filter:</label>
+            <div class="checkbox-group">
+                <label><input type="checkbox" name="species" value="setosa" checked> Setosa</label>
+                <label><input type="checkbox" name="species" value="versicolor" checked> Versicolor</label>
+                <label><input type="checkbox" name="species" value="virginica" checked> Virginica</label>
+            </div>
+        </div>
+        <div class="control-group">
+            <label for="marker-size">Marker Size:</label>
+            <input type="range" id="marker-size" min="2" max="20" value="8">
+        </div>
+        <div class="control-group">
+            <label for="marker-opacity">Marker Opacity:</label>
+            <input type="range" id="marker-opacity" min="0" max="1" step="0.1" value="0.7">
+        </div>
+        <button id="reset-view">Reset View</button>
+    </div>
+    <div class="main">
+        <div id="chart" class="chart"></div>
+    </div>
+</div>
+<div id="error-message"></div>
+
+<script>
+let data, is3D = false;
+
+// Fetch and process the data
+d3.csv('https://gist.githubusercontent.com/curran/a08a1080b88344b0c8a7/raw/0e7a9b0a5d22642a06d3d5b9bcbad9890c8ee534/iris.csv')
+    .then(rawData => {
+        data = rawData.map(d => ({
+            sepal_length: +d.sepal_length,
+            sepal_width: +d.sepal_width,
+            petal_length: +d.petal_length,
+            petal_width: +d.petal_width,
+            species: d.species
+        }));
+        updateChart();
+    })
+    .catch(error => {
+        console.error('Error loading the data:', error);
+        document.getElementById('error-message').textContent = 'Error loading data. Please check your internet connection and try again.';
+    });
+
+function updateChart() {
+    const xAxis = document.getElementById('x-axis').value;
+    const yAxis = document.getElementById('y-axis').value;
+    const zAxis = document.getElementById('z-axis').value;
+    const markerSize = document.getElementById('marker-size').value;
+    const markerOpacity = document.getElementById('marker-opacity').value;
+    const selectedSpecies = Array.from(document.querySelectorAll('input[name="species"]:checked')).map(cb => cb.value);
+
+    if (!data || data.length === 0) {
+        document.getElementById('error-message').textContent = 'No data available. Please check the data source.';
+        return;
+    }
+
+    const traces = selectedSpecies.map(species => ({
+        x: data.filter(d => d.species === species).map(d => d[xAxis]),
+        y: data.filter(d => d.species === species).map(d => d[yAxis]),
+        mode: 'markers',
+        type: is3D ? 'scatter3d' : 'scatter',
+        name: species,
+        marker: { 
+            size: parseInt(markerSize),
+            opacity: parseFloat(markerOpacity),
+            line: {
+                width: 1,
+                color: 'white'
+            }
+        }
+    }));
+
+    if (is3D) {
+        traces.forEach(trace => {
+            trace.z = data.filter(d => d.species === trace.name).map(d => d[zAxis]);
+        });
+    }
+
+    const layout = {
+        title: `Iris Dataset: ${xAxis.replace('_', ' ')} vs ${yAxis.replace('_', ' ')}${is3D ? ` vs ${zAxis.replace('_', ' ')}` : ''}`,
+        xaxis: { title: xAxis.replace('_', ' '), color: '#ffffff' },
+        yaxis: { title: yAxis.replace('_', ' '), color: '#ffffff' },
+        height: 600,
+        width: 900,
+        font: {
+            family: 'Roboto, sans-serif',
+            color: '#ffffff'
+        },
+        paper_bgcolor: 'rgba(51,51,51,0)',
+        plot_bgcolor: 'rgba(51,51,51,0)',
+        margin: {
+            l: 50,
+            r: 50,
+            b: 50,
+            t: 50,
+            pad: 4
+        }
+    };
+
+    if (is3D) {
+        layout.scene = {
+            xaxis: { title: xAxis.replace('_', ' '), color: '#ffffff' },
+            yaxis: { title: yAxis.replace('_', ' '), color: '#ffffff' },
+            zaxis: { title: zAxis.replace('_', ' '), color: '#ffffff' }
+        };
+    }
+
+    Plotly.newPlot('chart', traces, layout, {responsive: true})
+        .catch(error => {
+            console.error('Error plotting the chart:', error);
+            document.getElementById('error-message').textContent = 'Error displaying the chart. Please try again.';
+        });
+}
+
+function toggleDimension(dimension) {
+    is3D = dimension === '3d';
+    document.getElementById('toggle-2d').classList.toggle('active', !is3D);
+    document.getElementById('toggle-3d').classList.toggle('active', is3D);
+    document.getElementById('z-axis-group').style.display = is3D ? 'block' : 'none';
+    updateChart();
+}
+
+document.getElementById('x-axis').addEventListener('change', updateChart);
+document.getElementById('y-axis').addEventListener('change', updateChart);
+document.getElementById('z-axis').addEventListener('change', updateChart);
+document.getElementById('marker-size').addEventListener('input', updateChart);
+document.getElementById('marker-opacity').addEventListener('input', updateChart);
+document.querySelectorAll('input[name="species"]').forEach(cb => cb.addEventListener('change', updateChart));
+
+document.getElementById('toggle-2d').addEventListener('click', () => toggleDimension('2d'));
+document.getElementById('toggle-3d').addEventListener('click', () => toggleDimension('3d'));
+
+document.getElementById('reset-view').addEventListener('click', () => {
+    Plotly.purge('chart');
+    updateChart();
+});
+</script>
+</body>
+</html>

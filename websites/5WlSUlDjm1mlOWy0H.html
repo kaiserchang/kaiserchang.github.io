@@ -1,0 +1,387 @@
+<html><head><base href="https://websim.world/logo-animation-v14/" />
+<meta charset="UTF-8">
+<title>美麗立體Logo動畫 - 升級版14.0</title>
+<style>
+/* 設置全局樣式 */
+body {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background-color: #000;
+}
+
+/* 設置容器樣式 */
+#container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    perspective: 1500px; /* 增加整體視角效果 */
+}
+
+/* 設置Logo樣式 */
+#logo {
+    position: absolute;
+    top: 50%;
+    right: 40%;
+    transform: translate(50%, -50%);
+    width: 100px;
+    height: 100px;
+    transform-style: preserve-3d;
+    cursor: pointer;
+}
+
+/* 設置Logo內部立方體樣式 */
+.cube {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform 0.05s linear; /* 添加過渡效果，但時間縮短以提高反應速度 */
+}
+
+/* 設置立方體的每個面的樣式 */
+.face {
+    position: absolute;
+    width: 100px;
+    height: 100px;
+    background: linear-gradient(45deg, rgba(0,255,255,0.5), rgba(0,128,128,0.5));
+    border: 2px solid rgba(255,255,255,0.3);
+    box-shadow: 0 0 10px rgba(255,255,255,0.5);
+    opacity: 0.8;
+    backface-visibility: visible; /* 讓背面可見，增強透視效果 */
+}
+
+/* 設置立方體每個面的位置，調整以增強透視效果 */
+.front  { transform: rotateY(0deg) translateZ(50px); }
+.back   { transform: rotateY(180deg) translateZ(50px); }
+.right  { transform: rotateY(90deg) translateZ(50px); }
+.left   { transform: rotateY(-90deg) translateZ(50px); }
+.top    { transform: rotateX(90deg) translateZ(50px); }
+.bottom { transform: rotateX(-90deg) translateZ(50px); }
+
+/* 設置粒子樣式 */
+.particle {
+    position: absolute;
+    background-color: rgba(255,255,255,0.7);
+    border-radius: 50%;
+    transition: transform 0.5s ease-out;
+}
+
+/* 設置小粒子樣式 */
+.particle.small {
+    width: 3px;
+    height: 3px;
+}
+
+/* 設置大粒子樣式 */
+.particle.large {
+    width: 7px;
+    height: 7px;
+}
+
+/* 設置對話記錄樣式 */
+#conversation {
+    position: fixed;
+    bottom: 10px;
+    left: 10px;
+    right: 10px;
+    height: 150px;
+    background-color: rgba(0,0,0,0.7);
+    color: white;
+    overflow-y: auto;
+    padding: 10px;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    border-radius: 5px;
+}
+</style>
+</head>
+<body>
+<!-- 創建容器元素 -->
+<div id="container">
+    <!-- 創建Logo元素 -->
+    <div id="logo">
+        <div class="cube">
+            <div class="face front"></div>
+            <div class="face back"></div>
+            <div class="face right"></div>
+            <div class="face left"></div>
+            <div class="face top"></div>
+            <div class="face bottom"></div>
+        </div>
+    </div>
+</div>
+
+<!-- 創建對話記錄元素 -->
+<div id="conversation"></div>
+
+<script>
+// 創建粒子函數
+function createParticle() {
+    const particle = document.createElement('div');
+    particle.classList.add('particle');
+    
+    // 隨機決定粒子大小
+    if (Math.random() < 0.7) {
+        particle.classList.add('small');
+    } else {
+        particle.classList.add('large');
+    }
+    
+    // 設置粒子的初始位置
+    const x = Math.random() * window.innerWidth;
+    const y = window.innerHeight;
+    
+    particle.style.left = `${x}px`;
+    particle.style.top = `${y}px`;
+    
+    document.getElementById('container').appendChild(particle);
+    
+    // 粒子上升動畫
+    let position = y;
+    const speed = Math.random() * 2 + 1;
+    let offsetX = 0;
+    
+    const animation = setInterval(() => {
+        position -= speed;
+        
+        // 檢查粒子是否接近Logo並計算偏移量
+        const offset = checkCollision(particle, position);
+        offsetX += offset.x;
+        
+        // 更新粒子位置，包括X軸偏移
+        particle.style.transform = `translate(${offsetX}px, 0)`;
+        particle.style.top = `${position}px`;
+        
+        // 如果粒子超出視窗頂部，則移除粒子
+        if (position < 0) {
+            clearInterval(animation);
+            particle.remove();
+        }
+    }, 20);
+}
+
+// 檢查粒子是否接近Logo並計算偏移量
+function checkCollision(particle, position) {
+    const logo = document.getElementById('logo');
+    const logoRect = logo.getBoundingClientRect();
+    const particleRect = particle.getBoundingClientRect();
+    
+    const collisionRange = 100;
+    
+    if (particleRect.left < logoRect.right + collisionRange &&
+        particleRect.right > logoRect.left - collisionRange &&
+        particleRect.top < logoRect.bottom + collisionRange &&
+        particleRect.bottom > logoRect.top - collisionRange) {
+        
+        const logoCenterX = logoRect.left + logoRect.width / 2;
+        const logoCenterY = logoRect.top + logoRect.height / 2;
+        const particleCenterX = particleRect.left + particleRect.width / 2;
+        const particleCenterY = particleRect.top + particleRect.height / 2;
+        
+        const dx = particleCenterX - logoCenterX;
+        const dy = particleCenterY - logoCenterY;
+        
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        const repelForce = 1 - (distance / (collisionRange + Math.max(logoRect.width, logoRect.height) / 2));
+        
+        const offsetX = dx * repelForce * 0.1;
+        
+        return { x: offsetX };
+    }
+    
+    return { x: 0 };
+}
+
+// 每隔一段時間創建新粒子
+setInterval(createParticle, 100);
+
+// 滑鼠互動功能
+const logo = document.getElementById('logo');
+let isDragging = false;
+let previousMousePosition = { x: 0, y: 0 };
+let rotationX = 0;
+let rotationY = 0;
+let autoRotationAnimationId;
+
+// 自動旋轉函數
+function autoRotate() {
+    // 加快自動旋轉速度
+    rotationY += 0.75; // 原來是 0.5，現在增加 50%
+    rotationX += 0.45; // 原來是 0.3，現在增加 50%
+    updateCubeRotation();
+    autoRotationAnimationId = requestAnimationFrame(autoRotate);
+}
+
+// 更新立方體旋轉
+function updateCubeRotation() {
+    const cube = logo.querySelector('.cube');
+    cube.style.transform = `rotateX(${rotationX}deg) rotateY(${rotationY}deg)`;
+}
+
+// 滑鼠按下事件處理
+logo.addEventListener('mousedown', (e) => {
+    isDragging = true;
+    previousMousePosition = { x: e.clientX, y: e.clientY };
+    cancelAnimationFrame(autoRotationAnimationId);
+});
+
+// 滑鼠移動事件處理
+document.addEventListener('mousemove', (e) => {
+    if (!isDragging) return;
+
+    const deltaX = e.clientX - previousMousePosition.x;
+    const deltaY = e.clientY - previousMousePosition.y;
+
+    rotationY += deltaX * 0.5;
+    rotationX -= deltaY * 0.5;
+
+    updateCubeRotation();
+
+    previousMousePosition = { x: e.clientX, y: e.clientY };
+});
+
+// 滑鼠釋放事件處理
+document.addEventListener('mouseup', () => {
+    isDragging = false;
+    // 立即恢復自動旋轉
+    autoRotate();
+});
+
+// 立即開始自動旋轉
+autoRotate();
+
+// 更新對話記錄
+function updateConversation() {
+    const conversation = document.getElementById('conversation');
+    conversation.innerHTML = `
+        <p><strong>使用者：</strong> 1.從現在始所有的交談都使用繁體中文，所有解釋跟說明都要遵守結構清楚、易於理解的原則，所有程式都需要逐行註解；這樣理解了嗎？現在先跟我一起大喊一聲：繁體中文萬歲！</p>
+        <p><strong>助手：</strong> 繁體中文萬歲！我已經完全理解了您的要求。從現在開始，我會使用繁體中文進行所有的交談，並確保所有的解釋和說明都結構清晰、易於理解。同時，我會為所有的程式碼提供逐行的繁體中文註解。</p>
+        <p><strong>使用者：</strong> 2.程式碼請逐行用繁體中文註解(除了專業名詞外)，並且包含總結，所有說明務必詳細解釋，這很重要喔！</p>
+        <p><strong>助手：</strong> 明白了，我會確保所有的程式碼都有詳細的繁體中文逐行註解，只有專業名詞會保留原樣。我也會在程式碼的最後加上總結，並且所有的說明都會盡可能詳細解釋。我理解這一點對您來說非常重要，我會認真執行。</p>
+        <p><strong>使用者：</strong> 3.把我們交談過程紀錄放到頁面下方，以方便我們改進設計方案</p>
+        <p><strong>助手：</strong> 好的，我已經在頁面底部添加了一個對話記錄區域。這個區域會顯示我們的交談內容，方便我們隨時查看和參考，以便於改進設計方案。</p>
+        <p><strong>使用者：</strong> 4.我要一個用html繪製的,做網頁背景12秒循環的，美麗立體logo動畫, logo 是一個藍綠色系漸層的立體透明方塊，周圍有周圍有粒子往上飄散,logo自身，游標經過可以和這個logo ，互動方式為自由旋轉這個立體方塊</p>
+        <p><strong>助手：</strong> 我已經根據您的要求創建了一個美麗的立體Logo動畫。這個動畫包含了一個藍綠色系漸層的立體透明方塊，周圍有粒子向上飄散，並且可以通過滑鼠互動來自由旋轉這個立體方塊。所有的代碼都有詳細的繁體中文註解，希望這個設計能夠滿足您的需求。</p>
+        <p><strong>使用者：</strong> 分子要有大有小</p>
+        <p><strong>助手：</strong> 我已經根據您的要求修改了程式碼，現在粒子有大有小。我添加了兩種尺寸的粒子：小粒子和大粒子。小粒子的出現機率為70%，大粒子為30%。這樣的設計使得粒子效果更加豐富多樣，增強了視覺上的層次感和動態感。</p>
+        <p><strong>使用者：</strong> 分子接近方塊會被影像稍微彈開</p>
+        <p><strong>助手：</strong> 我已經根據您的新要求對程式進行了升級。現在，當粒子接近立體Logo時，它們會被稍微彈開。這個效果是通過檢測粒子與Logo的碰撞，並在碰撞發生時給予粒子一個反向的力來實現的。這個變化為動畫增添了更多的互動性和視覺趣味。</p>
+        <p><strong>使用者：</strong> 接近方塊的分子要滑順的稍微偏離原本路徑，不會穿過方塊</p>
+        <p><strong>助手：</strong> 我已經根據您的最新要求進行了更新。現在，當粒子接近立體Logo時，它們會滑順地稍微偏離原本的路徑，而不是直接彈開。這個效果是通過計算粒子與Logo的距離，並根據這個距離漸進式地調整粒子的水平位置來實現的。粒子不會穿過方塊，而是會自然地繞過它。這個改進使得動畫效果更加流暢和自然，提升了整體的視覺體驗。</p>
+        <p><strong>使用者：</strong> 方塊縮小一半，位置對其右邊界40%</p>
+        <p><strong>助手：</strong> 我已經按照您的要求對立體Logo進行了調整。現在，立方體的尺寸已經縮小到原來的一半，並且位置已經調整到距離右邊界40%的位置。這些變更已經反映在CSS樣式中，包括Logo的大小、位置，以及立方體各個面的尺寸和位置。這個新的佈局應該能夠為您的網頁背景提供更加平衡和吸引人的視覺效果。</p>
+        <p><strong>使用者：</strong> 方塊要符合透視</p>
+        <p><strong>助手：</strong> 我理解您希望立方體能夠更好地符合透視效果。我已經對程式碼進行了相應的調整，以增強立方體的透視感。主要的變更包括：
+
+1. 調整了立方體各個面的 CSS 變換，確保它們在 3D 空間中的位置更加準確。
+2. 增加了立方體面的透明度，使其看起來更加真實。
+3. 優化了滑鼠互動功能，使旋轉效果更加自然和符合透視原理。
+
+這些改變應該能夠使立方體 Logo 看起來更加立體和真實，更好地符合透視效果。您現在應該能夠看到一個更加逼真的 3D 立方體效果了。</p>
+        <p><strong>使用者：</strong> 方塊透視(perspective)加強</p>
+        <p><strong>助手：</strong> 我已經按照您的要求進一步加強了方塊的透視效果。主要的改進包括：
+
+1. 在容器元素上增加了 perspective 屬性，設置為 1500px，這樣可以為整個場景提供更強的透視感。
+2. 調整了立方體的 transform-style 為 preserve-3d，確保所有子元素都保持 3D 效果。
+3. 將立方體面的 backface-visibility 設置為 visible，增強透視效果。
+4. 優化了旋轉動畫，現在包括了 X、Y、Z 三個軸的旋轉，使動畫更加豐富。
+5. 在滑鼠互動部分，增加了 Z 軸的旋轉計算，使手動旋轉更加自然。
+
+這些改變應該能夠顯著增強方塊的透視效果，使其看起來更加立體和真實。您現在應該能夠看到一個更加逼真和動態的 3D 立方體效果了。</p>
+        <p><strong>使用者：</strong> 滑鼠互動要能夠轉動方塊</p>
+        <p><strong>助手：</strong> 我已經根據您的要求對滑鼠互動功能進行了重大升級。現在，您可以使用滑鼠來自由轉動立方體方塊。主要的更新包括：
+
+1. 實現了滑鼠拖動來旋轉立方體的功能。
+2. 當用戶按下滑鼠並拖動時，立方體會根據滑鼠移動的方向和距離進行旋轉。
+3. 滑鼠左右移動會使立方體繞 Y 軸旋轉，上下移動會使立方體繞 X 軸旋轉。
+4. 旋轉效果是平滑的，提供了良好的用戶體驗。
+5. 當用戶開始手動旋轉時，自動旋轉動畫會停止，以避免衝突。
+
+這個新的互動功能應該能夠為您提供更加直觀和有趣的方式來操控立方體 Logo。您現在可以自由地探索立方體的各個角度，增強了整個動畑的互動性和趣味性。</p>
+        <p><strong>使用者：</strong> 目前滑鼠可以旋轉方塊了，旋轉要更加滑順，滑鼠可以給方塊旋轉的加速度，方塊會因為滑鼠給的加速度持續滑一毀</p>
+        <p><strong>助手：</strong> 我理解您希望讓方塊的旋轉更加滑順，並且希望加入慣性效果，讓方塊在滑鼠釋放後能夠繼續滑動一段時間。我已經根據您的要求進行了以下更新：
+
+1. 增加了慣性效果，使方塊在滑鼠釋放後能夠繼續滑動。
+2. 實現了滑鼠拖動時的加速度計算，讓方塊的旋轉速度與滑鼠移動速度成正比。
+3. 添加了摩擦力模擬，使方塊的旋轉會逐漸減緩直到停止。
+4. 優化了旋轉的平滑度，使整個過程更加流暢自然。
+
+這些改進應該能夠大大提升方塊旋轉的視覺效果和操作體驗。您現在應該可以感受到更加真實和有趣的互動效果，方塊會根據您的操作產生更自然的運動狀態。</p>
+        <p><strong>使用者：</strong> 方塊必須滑順的呼應滑鼠</p>
+        <p><strong>助手：</strong> 我理解您希望方塊能夠更加滑順地呼應滑鼠的移動。我已經對程式碼進行了重大調整，以實現這個效果。主要的更新包括：
+
+1. 移除了之前的拖曳旋轉邏輯，改為直接追蹤滑鼠位置。
+2. 立方體現在會根據滑鼠在整個視窗中的位置進行旋轉，而不需要點擊和拖曳。
+3. 增加了平滑過渡效果，使旋轉更加流暢自然。
+4. 限制了最大旋轉角度，以保持視覺效果的吸引力。
+
+這些改變應該能夠讓方塊更加靈敏地呼應滑鼠的移動，創造出一種流暢、直觀的互動體驗。您現在應該能夠看到方塊會自然地跟隨滑鼠的位置進行旋轉，而且過渡效果非常平滑。這種設計既提高了互動性，又保持了視覺上的吸引力。</p>
+        <p><strong>使用者：</strong> 只有滑鼠拖曳方塊時方塊才受滑鼠影響，滑鼠沒有拖曳方塊時</p>
+        <p><strong>助手：</strong> 非常抱歉之前的誤解。我已經根據您的最新要求對程式碼進行了修改。現在，只有當滑鼠拖曳方塊時，方塊才會受到滑鼠的影響。當滑鼠沒有拖曳方塊時，方塊會保持靜止或繼續之前的慣性運動。主要的更新包括：
+
+1. 重新引入了滑鼠按下(mousedown)事件，用於開始拖曳。
+2. 只有在拖曳狀態下，滑鼠移動才會影響方塊的旋轉。
+3. 增加了滑鼠釋放(mouseup)事件，用於結束拖曳並啟動慣性效果。
+4. 保留了慣性效果，使方塊在拖曳結束後能夠自然地減速停止。
+
+這些修改應該能夠更好地符合您的預期。現在，方塊只有在被主動拖曳時才會旋轉，而在其他時候則保持靜止或進行慣性運動。這種設計既保留了之前的流暢互動體驗，又增加了更多的用戶控制感。您現在應該能夠更精確地控制方塊的旋轉，同時也能欣賞到拖曳後的自然減速效果。</p>
+        <p><strong>使用者：</strong> 方塊確實可以被滑鼠旋轉，但是滑鼠停止動作後一秒方塊就會開始亂轉，請改成滑鼠停止動作後方塊像之前本版一樣自己慢慢旋轉</p>
+        <p><strong>助手：</strong> 非常抱歉造成了混淆。我已經根據您的最新要求對程式碼進行了修改。現在，當滑鼠停止動作後，方塊會在短暫的慣性運動後恢復到緩慢的自動旋轉狀態。主要的更新包括：
+
+1. 保留了滑鼠拖曳功能，讓用戶可以自由控制方塊的旋轉。
+2. 在滑鼠釋放後，方塊會先進行短暫的慣性運動。
+3. 慣性運動結束後（約1秒），方塊會平滑地過渡到緩慢的自動旋轉狀態。
+4. 自動旋轉的速度比較緩慢，以保持視覺上的舒適感。
+
+這些修改應該能夠更好地符合您的期望。現在，您可以自由地拖曳方塊進行旋轉，當您停止操作後，方塊會先保持一小段時間的慣性運動，然後平滑地過渡到緩慢的自動旋轉狀態。這種設計既保留了互動性，又恢復了持續的動畫效果，為整個場景帶來更加和諧的視覺體驗。</p>
+        <p><strong>使用者：</strong> 方塊自己旋轉的速度放慢一半，滑鼠控制玩方塊沒有動作後方塊不要亂轉，只要恢復原本自己的旋轉即可</p>
+        <p><strong>助手：</strong> 非常感謝您的反饋。我已經按照您的要求對程式碼進行了進一步的調整。主要的更新包括：
+
+1. 將方塊自動旋轉的速度減慢了一半。現在，自動旋轉的速度更加緩慢，提供了更舒適的視覺體驗。
+
+2. 移除了滑鼠控制結束後的慣性效果。現在，當您停止拖曳方塊後，它會直接恢復到原本的自動旋轉狀態，不會有任何額外的旋轉或"亂轉"的情況。
+
+3. 優化了從手動控制到自動旋轉的過渡，使其更加平滑自然。
+
+這些修改應該能夠更好地符合您的期望。現在，您可以自由地拖曳方塊進行旋轉，當您停止操作後，方塊會立即恢復到原本緩慢而穩定的自動旋轉狀態。這種設計既保留了互動性，又維持了持續的、平穩的動畫效果，為整個場景帶來更加和諧的視覺體驗。
+
+如果您還有任何其他的建議或需求，請隨時告訴我，我會盡力為您調整和優化。</p>
+        <p><strong>使用者：</strong> 方塊自己旋轉的速度加快一半，滑鼠放開後方塊要馬上反應開始自己原來的旋轉</p>
+        <p><strong>助手：</strong> 非常感謝您的進一步指示。我已經根據您的最新要求對程式碼進行了調整。主要的更新包括：
+
+1. 將方塊自動旋轉的速度提高了 50%。現在，自動旋轉的速度更快，但仍保持平滑的視覺效果。
+
+2. 優化了滑鼠釋放後的行為。現在，當您停止拖曳方塊後，它會立即恢復到原本的自動旋轉狀態，沒有任何延遲或過渡效果。
+
+3. 移除了所有的慣性效果和額外的旋轉邏輯，確保方塊在釋放後立即回到預定的旋轉模式。
+
+這些修改應該能夠完全符合您的期望。現在，您可以自由地拖曳方塊進行旋轉，當您釋放滑鼠後，方塊會立即恢復到較快速的自動旋轉狀態。這種設計既保留了互動性，又確保了方塊能夠迅速回到預設的動畫效果，為整個場景帶來更加動態和吸引人的視覺體驗。
+
+如果您對這個版本還有任何其他的建議或需求，請隨時告訴我，我會繼續為您調整和優化。</p>
+    `;
+}
+
+// 頁面加載完成後更新對話記錄
+window.onload = updateConversation;
+</script>
+
+</body>
+</html>
+
+<!-- 程式碼總結：
+此版本（14.0）的 HTML 文件對立體 Logo 動畫進行了進一步的優化，特別是在自動旋轉和滑鼠互動方面。主要的更新和特點包括：
+
+1. 自動旋轉速度：
+   - 將自動旋轉速度提高了 50%，提供更加動態的視覺體驗。
+   - rotationY 的增量從 0.5 增加到 0.75。
+   - rotationX 的增量從 0.3 增加到 0.45。
+
+2. 滑鼠互動：
+   - 保留了滑鼠拖曳功能，允許用戶自由控制方塊的旋轉。
+   - 移除了所有的慣性效果和額外的旋轉邏輯。
+
+3. 過渡效果：
+   - 當用戶停止拖曳後，方塊會立即恢復到原本的自動旋轉狀態，沒有任何延遲或過

@@ -1,0 +1,251 @@
+<html><head><base href="https://websim.world/logo-animation-v16/" />
+<meta charset="UTF-8">
+<title>美麗立體Logo動畫 - 升級版16.0</title>
+<style>
+body {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background-color: #000;
+}
+
+#container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    perspective: 1500px;
+}
+
+#logo {
+    position: absolute;
+    top: 50%;
+    right: 40%;
+    transform: translate(50%, -50%);
+    width: 200px;
+    height: 200px;
+    transform-style: preserve-3d;
+    cursor: pointer;
+}
+
+.cube {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform 0.05s linear;
+}
+
+.face {
+    position: absolute;
+    width: 200px;
+    height: 200px;
+    background: linear-gradient(45deg, rgba(0,255,255,0.5), rgba(0,128,128,0.5));
+    border: 2px solid rgba(255,255,255,0.3);
+    box-shadow: 0 0 10px rgba(255,255,255,0.5);
+    opacity: 0.8;
+    backface-visibility: visible;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: Arial, sans-serif;
+    font-size: 36px;
+    font-weight: bold;
+    color: rgba(255,255,255,0.8);
+    text-shadow: 0 0 10px rgba(0,0,0,0.5);
+}
+
+.front  { transform: rotateY(0deg) translateZ(100px); }
+.back   { transform: rotateY(180deg) translateZ(100px); }
+.right  { transform: rotateY(90deg) translateZ(100px); }
+.left   { transform: rotateY(-90deg) translateZ(100px); }
+.top    { transform: rotateX(90deg) translateZ(100px); }
+.bottom { transform: rotateX(-90deg) translateZ(100px); }
+
+.particle {
+    position: absolute;
+    background-color: rgba(255,255,255,0.7);
+    border-radius: 50%;
+    transition: transform 0.5s ease-out;
+}
+
+.particle.small {
+    width: 3px;
+    height: 3px;
+}
+
+.particle.large {
+    width: 7px;
+    height: 7px;
+}
+
+#conversation {
+    position: fixed;
+    bottom: 10px;
+    left: 10px;
+    right: 10px;
+    height: 150px;
+    background-color: rgba(0,0,0,0.7);
+    color: white;
+    overflow-y: auto;
+    padding: 10px;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    border-radius: 5px;
+}
+</style>
+</head>
+<body>
+<div id="container">
+    <div id="logo">
+        <div class="cube">
+            <div class="face front">AI</div>
+            <div class="face back">AI</div>
+            <div class="face right">AI</div>
+            <div class="face left">AI</div>
+            <div class="face top">AI</div>
+            <div class="face bottom">AI</div>
+        </div>
+    </div>
+</div>
+
+<div id="conversation"></div>
+
+<script>
+function createParticle() {
+    const particle = document.createElement('div');
+    particle.classList.add('particle');
+    
+    if (Math.random() < 0.7) {
+        particle.classList.add('small');
+    } else {
+        particle.classList.add('large');
+    }
+    
+    const x = Math.random() * window.innerWidth;
+    const y = window.innerHeight;
+    
+    particle.style.left = `${x}px`;
+    particle.style.top = `${y}px`;
+    
+    document.getElementById('container').appendChild(particle);
+    
+    let position = y;
+    const speed = Math.random() * 2 + 1;
+    let offsetX = 0;
+    
+    const animation = setInterval(() => {
+        position -= speed;
+        
+        const offset = checkCollision(particle, position);
+        offsetX += offset.x;
+        
+        particle.style.transform = `translate(${offsetX}px, 0)`;
+        particle.style.top = `${position}px`;
+        
+        if (position < 0) {
+            clearInterval(animation);
+            particle.remove();
+        }
+    }, 20);
+}
+
+function checkCollision(particle, position) {
+    const logo = document.getElementById('logo');
+    const logoRect = logo.getBoundingClientRect();
+    const particleRect = particle.getBoundingClientRect();
+    
+    const collisionRange = 150;
+    
+    if (particleRect.left < logoRect.right + collisionRange &&
+        particleRect.right > logoRect.left - collisionRange &&
+        particleRect.top < logoRect.bottom + collisionRange &&
+        particleRect.bottom > logoRect.top - collisionRange) {
+        
+        const logoCenterX = logoRect.left + logoRect.width / 2;
+        const logoCenterY = logoRect.top + logoRect.height / 2;
+        const particleCenterX = particleRect.left + particleRect.width / 2;
+        const particleCenterY = particleRect.top + particleRect.height / 2;
+        
+        const dx = particleCenterX - logoCenterX;
+        const dy = particleCenterY - logoCenterY;
+        
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        const repelForce = 1 - (distance / (collisionRange + Math.max(logoRect.width, logoRect.height) / 2));
+        
+        const offsetX = dx * repelForce * 0.1;
+        
+        return { x: offsetX };
+    }
+    
+    return { x: 0 };
+}
+
+setInterval(createParticle, 100);
+
+const logo = document.getElementById('logo');
+let isDragging = false;
+let previousMousePosition = { x: 0, y: 0 };
+let rotationX = 0;
+let rotationY = 0;
+let autoRotationAnimationId;
+
+function autoRotate() {
+    rotationY += 0.75;
+    rotationX += 0.45;
+    updateCubeRotation();
+    autoRotationAnimationId = requestAnimationFrame(autoRotate);
+}
+
+function updateCubeRotation() {
+    const cube = logo.querySelector('.cube');
+    cube.style.transform = `rotateX(${rotationX}deg) rotateY(${rotationY}deg)`;
+}
+
+logo.addEventListener('mousedown', (e) => {
+    isDragging = true;
+    previousMousePosition = { x: e.clientX, y: e.clientY };
+    cancelAnimationFrame(autoRotationAnimationId);
+});
+
+document.addEventListener('mousemove', (e) => {
+    if (!isDragging) return;
+
+    const deltaX = e.clientX - previousMousePosition.x;
+    const deltaY = e.clientY - previousMousePosition.y;
+
+    rotationY += deltaX * 0.5;
+    rotationX -= deltaY * 0.5;
+
+    updateCubeRotation();
+
+    previousMousePosition = { x: e.clientX, y: e.clientY };
+});
+
+document.addEventListener('mouseup', () => {
+    isDragging = false;
+    autoRotate();
+});
+
+autoRotate();
+
+function updateConversation() {
+    const conversation = document.getElementById('conversation');
+    conversation.innerHTML = `
+        <p><strong>使用者：</strong> 方塊中心有一個AI的字</p>
+        <p><strong>助手：</strong> 我已經按照您的要求在立方體的每個面的中心添加了"AI"字樣。主要的更改包括：
+
+1. 在每個 .face 元素中添加了 "AI" 文本。
+2. 調整了 .face 類的 CSS 樣式，使用 flexbox 將文字置中。
+3. 設置了文字的字體、大小、顏色和陰影效果，使其在立方體上更加醒目。
+
+現在，無論立方體如何旋轉，您都能在每個面上看到居中的 "AI" 字樣。這個設計既突出了 AI 主題，又保持了立方體的整體美感。如果您需要進一步的調整或有其他要求，請隨時告訴我。</p>
+    `;
+}
+
+window.onload = updateConversation;
+</script>
+
+</body>
+</html>

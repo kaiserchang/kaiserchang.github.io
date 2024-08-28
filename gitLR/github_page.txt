@@ -1,0 +1,90 @@
+首先在個人 GitHub 上開一個全新的專案
+在專案名稱的地方，填寫「username.github.io」
+本機建立username.github.io目錄，建立 index.html
+終端機中進入該資料夾內執行
+
+git init
+......
+git add index.html
+git commit -m "add index"
+......
+git remote add origin https://github.com/username/username.github.io.git
+......
+git push -u origin master
+......
+
+推上去之後在去專案作設定
+
+進入 setting(右上) --> page(左下末) --> 選擇建立 save
+
+
+https://username.github.io/
+
+
+若要下載
+
+git pull
+
+
+將遠端資料拉回本地端
+作法一、git pull
+將遠端分支資料拉回並合併本地分支
+寫法：$ git pull original <branch-name>
+實際操作：
+step1. 切換到新分支： $ git checkout <new_branch>
+step2. 從遠端更新程式碼：$ git pull
+作法二、git fetch + git merge
+這種做法是將「拉回」、「合併」這兩個動作分開執行。
+步驟：
+step1. 取得遠端資料分支資料拷貝回本地：$ git fetch
+
+step2. 切換到本地端 master 分支：$ git checkout master
+
+step3. 將本地分支與本地端 master 分支進行合併：$ git merge origin/master
+
+
+.gitignore 手動增加該檔，在檔案中新增想要忽略上傳的內容 （加上 “/” ）
+
+資料夾名稱/
+檔名/
+
+如
+venv/：虛擬環境目錄
+*.pyc：編譯後的 Python 檔案
+__pycache__/：Python 缓存目錄
+*.egg-info/：Egg 檔案資訊目錄
+dist/：發佈目錄
+build/：建置目錄
+*.log：日誌檔案
+*.tmp：暫存檔案
+*.bak：備份檔案
+*.swp、*.swo、*.swn：Vim 交換檔案
+*.pyo、*.pyd：優化後的 Python 檔案
+
+
+
+<I老師說：>
+解釋
+讓我們逐步解釋這些 Git 命令和參數的作用，以及它們如何用於創建和推送到 GitHub Pages 網站：
+
+1. git init
+作用: 初始化一個新的 Git 儲存庫（repository）。這會在當前目錄下創建一個 .git 隱藏目錄，其中包含所有的 Git 元數據和版本控制信息。
+使用場景: 當你想要開始使用 Git 來管理你的專案時使用這個命令。
+2. git add index.html
+作用: 將 index.html 文件添加到暫存區（staging area）。這意味著 index.html 文件的變更將被包含在下一次提交（commit）中。
+使用場景: 當你修改了文件或新增了文件，並且想要將這些變更記錄到 Git 儲存庫中時，使用這個命令。
+3. git commit -m "add index"
+作用: 提交暫存區的變更到本地 Git 儲存庫。-m "add index" 是提交信息，描述了這次提交的內容或目的。這裡的提交信息是 "add index"。
+使用場景: 當你準備將暫存區的變更保存到本地儲存庫時，使用這個命令。提交信息應該簡明扼要地描述變更內容。
+4. git remote add origin https://github.com/eddiekao/eddiekao.github.io.git
+作用: 添加一個遠端儲存庫（remote repository），命名為 origin。origin 是遠端儲存庫的默認名稱，你可以用它來推送和拉取變更。https://github.com/eddiekao/eddiekao.github.io.git 是這個遠端儲存庫的 URL。
+使用場景: 當你要將本地儲存庫與 GitHub 上的遠端儲存庫關聯時使用這個命令。
+5. git push -u origin master
+作用: 將本地 master 分支的變更推送到遠端 origin 儲存庫。-u 選項會將本地 master 分支與遠端 origin/master 分支建立跟蹤關係（tracking relationship），以便未來使用 git push 和 git pull 時可以省略遠端和分支名稱。
+使用場景: 當你完成了本地變更並希望將這些變更推送到 GitHub 上的遠端儲存庫時使用這個命令。
+6. https://username.github.io/
+作用: 這是一個 GitHub Pages 網站的 URL。username 是你的 GitHub 用戶名。推送到 GitHub 的儲存庫後，你可以通過這個 URL 訪問你部署的靜態網站。
+使用場景: 當你成功推送了網站內容到 GitHub Pages 上，你可以使用這個 URL 來查看你的網站。
+
+總結
+這些命令和步驟的目的是將你的靜態網站文件（例如 index.html）上傳到 GitHub 上的儲存庫，並利用 GitHub Pages 部署這個網站。最終，你可以通過 https://username.github.io/ 這個網址來訪問你部署的網站。

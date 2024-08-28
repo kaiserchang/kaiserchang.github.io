@@ -1,0 +1,87 @@
+
+/* 設置容器樣式 */
+.container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    perspective: 1600px;
+    z-index: 1;
+    
+    /* 增加整體視角效果 */
+}
+
+/* 設置Logo樣式 */
+.logo {
+    position: absolute;
+    top: 68%;
+    right: 25%;
+    transform: translate(50%, -50%);
+    width: 200px; /* 放大2倍 */
+    height: 200px; /* 放大2倍 */
+    transform-style: preserve-3d;
+    cursor: pointer;
+    
+}
+
+/* 設置Logo內部立方體樣式 */
+.cube {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform 0.05s linear;
+    /* 添加過渡效果，但時間縮短以提高反應速度 */
+}
+
+/* 設置立方體的每個面的樣式 */
+.face {
+    position: absolute;
+    width: 200px;
+    height: 200px;
+    background: linear-gradient(45deg, rgba(0,255,255,0.5), rgba(0,128,128,0.5));
+    border: 2px solid rgba(255,255,255,0.3);
+    box-shadow: 0 0 10px rgba(255,255,255,0.5);
+    opacity: 0.8;
+    backface-visibility: visible;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: Arial, sans-serif;
+    font-size: 24px;
+    font-weight: bold;
+    color: rgba(255,255,255,0.8);
+    text-shadow: 0 0 10px rgba(0,0,0,0.5);
+    text-align: center;
+}
+
+/* 設置立方體每個面的位置，調整以增強透視效果 */
+.front  { transform: rotateY(0deg) translateZ(100px); } /* 放大2倍 */
+.back   { transform: rotateY(180deg) translateZ(100px); } /* 放大2倍 */
+.right  { transform: rotateY(90deg) translateZ(100px); } /* 放大2倍 */
+.left   { transform: rotateY(-90deg) translateZ(100px); } /* 放大2倍 */
+.top    { transform: rotateX(90deg) translateZ(100px); } /* 放大2倍 */
+.bottom { transform: rotateX(-90deg) translateZ(100px); } /* 放大2倍 */
+
+/* 設置粒子樣式 */
+.particle {
+    position: absolute;
+    background-color: rgba(255, 255, 255, 0.7);
+    border-radius: 50%;
+    transition: transform 0.5s ease-out;
+}
+
+/* 設置小粒子樣式 */
+.particle.small {
+    width: 2px;
+    height: 2px;
+}
+
+/* 設置大粒子樣式 */
+.particle.large {
+    width: 5px;
+    height: 5px;
+}
+
+
