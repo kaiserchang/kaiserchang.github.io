@@ -1,27 +1,4 @@
 
-
-@media screen and (max-width: 896px) and (orientation: landscape) {
-    body, #container {
-        height: auto;
-        min-height: 100vh;
-        overflow-y: auto;
-    }
-
-    #logo {
-        position: relative;
-        top: auto;
-        left: auto;
-        transform: none;
-        margin: 20px auto;
-    }
-
-    /* .particle {
-        display: none; /* 在手機橫向模式下隱藏粒子 */
-    } */
-
-
-
-
 /* 設置容器樣式 */
 .container {
     position: fixed;
