@@ -2,31 +2,25 @@ const container = document.getElementById('container');
 const logo = document.getElementById('logo');
 const particles = [];
 
+// 在 myBox.js 中添加這個函數 (手機問題)
 function isMobileLandscape() {
     return window.matchMedia("(max-width: 896px) and (orientation: landscape)").matches;
-}
-
-function handleMobileLandscape() {
-    if (isMobileLandscape()) {
-        container.style.height = 'auto';
-        container.style.overflow = 'auto';
-        document.body.style.overflow = 'auto';
-    } else {
-        container.style.height = '100vh';
-        container.style.overflow = 'hidden';
-        document.body.style.overflow = 'hidden';
-    }
 }
 
 function createParticle() {
     const particle = document.createElement('div');
     particle.classList.add('particle');
+    
     particle.classList.add(Math.random() < 0.7 ? 'small' : 'large');
+    
     const x = Math.random() * window.innerWidth;
     const y = window.innerHeight;
+    
     particle.style.transform = `translate(${x}px, ${y}px)`;
     particle.style.position = 'absolute';
+    
     container.appendChild(particle);
+    
     return {
         element: particle,
         position: { x, y },
@@ -36,14 +30,15 @@ function createParticle() {
 }
 
 function updateParticles() {
-    if (isMobileLandscape()) return; // 在手機橫向模式下不更新粒子
-
     for (let i = particles.length - 1; i >= 0; i--) {
         const particle = particles[i];
         particle.position.y -= particle.speed;
+        
         const offset = checkCollision(particle);
         particle.offsetX += offset.x;
+        
         particle.element.style.transform = `translate(${particle.position.x + particle.offsetX}px, ${particle.position.y}px)`;
+        
         if (particle.position.y < 0) {
             container.removeChild(particle.element);
             particles.splice(i, 1);
@@ -54,29 +49,30 @@ function updateParticles() {
 function checkCollision(particle) {
     const logoRect = logo.getBoundingClientRect();
     const particleRect = particle.element.getBoundingClientRect();
+    
     const collisionRange = 150;
-
+    
     if (particleRect.left < logoRect.right + collisionRange &&
         particleRect.right > logoRect.left - collisionRange &&
         particleRect.top < logoRect.bottom + collisionRange &&
         particleRect.bottom > logoRect.top - collisionRange) {
-
+        
         const logoCenterX = logoRect.left + logoRect.width / 2;
         const logoCenterY = logoRect.top + logoRect.height / 2;
         const particleCenterX = particleRect.left + particleRect.width / 2;
         const particleCenterY = particleRect.top + particleRect.height / 2;
-
+        
         const dx = particleCenterX - logoCenterX;
         const dy = particleCenterY - logoCenterY;
-
+        
         const distance = Math.sqrt(dx * dx + dy * dy);
         const repelForce = 1 - (distance / (collisionRange + Math.max(logoRect.width, logoRect.height) / 2));
-
+        
         const offsetX = dx * repelForce * 0.1;
-
+        
         return { x: offsetX };
     }
-
+    
     return { x: 0 };
 }
 
@@ -98,11 +94,15 @@ logo.addEventListener('mousedown', (e) => {
 
 document.addEventListener('mousemove', (e) => {
     if (!isDragging) return;
+
     const deltaX = e.clientX - previousMousePosition.x;
     const deltaY = e.clientY - previousMousePosition.y;
+
     rotationY += deltaX * 0.5;
     rotationX -= deltaY * 0.5;
+
     updateCubeRotation();
+
     previousMousePosition = { x: e.clientX, y: e.clientY };
 });
 
@@ -111,28 +111,19 @@ document.addEventListener('mouseup', () => {
 });
 
 function animate() {
-    if (!isMobileLandscape()) {
-        if (!isDragging) {
-            rotationY += autoRotationSpeed.y;
-            rotationX += autoRotationSpeed.x;
-            updateCubeRotation();
-        }
-
-        if (particles.length < 50 && Math.random() < 0.1) {
-            particles.push(createParticle());
-        }
-
-        updateParticles();
+    if (!isDragging) {
+        rotationY += autoRotationSpeed.y;
+        rotationX += autoRotationSpeed.x;
+        updateCubeRotation();
     }
+
+    if (particles.length < 50 && Math.random() < 0.1) {
+        particles.push(createParticle());
+    }
+
+    updateParticles();
 
     requestAnimationFrame(animate);
 }
-
-// 添加事件監聽器來處理屏幕方向變化
-window.addEventListener('resize', handleMobileLandscape);
-window.addEventListener('orientationchange', handleMobileLandscape);
-
-// 初始化時調用一次
-handleMobileLandscape();
 
 animate();
