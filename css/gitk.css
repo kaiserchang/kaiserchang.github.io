@@ -1,5 +1,5 @@
+/* 
 
-/* 偵測在手機橫向模式 */
 @media screen and (prefers-reduced-motion: reduce) {
     html {
         scroll-behavior: auto;
@@ -20,9 +20,10 @@
     }
 
     .particle {
-        display: none; /* 在手機橫向模式下隱藏粒子 */
+        display: none; 
     }
-}
+} 
+*/
 
 
 body {
