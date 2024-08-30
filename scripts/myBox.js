@@ -1,62 +1,47 @@
-
-
-//---------------------------------------------------------------------------------------------
-
-
-
-// const container = document.getElementById('container');
-// const logo = document.getElementById('logo');
-// const particles = [];
-
-// // 在 myBox.js 中添加這個函數 (手機問題)
-// function isMobileLandscape() {
-//     return window.matchMedia("(max-width: 896px) and (orientation: landscape)").matches;
-// }
-
-// function createParticle() {
-//     const particle = document.createElement('div');
-//     particle.classList.add('particle');
+function createParticle() {
+    const particle = document.createElement('div');
+    particle.classList.add('particle');
     
-//     particle.classList.add(Math.random() < 0.7 ? 'small' : 'large');
-    
-//     const x = Math.random() * window.innerWidth;
-//     const y = window.innerHeight;
-    
-//     particle.style.transform = `translate(${x}px, ${y}px)`;
-//     particle.style.position = 'absolute';
-    
-//     container.appendChild(particle);
-    
-//     return {
-//         element: particle,
-//         position: { x, y },
-//         speed: Math.random() * 2 + 1,
-//         offsetX: 0
-//     };
-// }
-
-// function updateParticles() {
-//     for (let i = particles.length - 1; i >= 0; i--) {
-        const particle = particles[i];
-        particle.position.y -= particle.speed;
-        
-        const offset = checkCollision(particle);
-        particle.offsetX += offset.x;
-        
-        particle.element.style.transform = `translate(${particle.position.x + particle.offsetX}px, ${particle.position.y}px)`;
-        
-        if (particle.position.y < 0) {
-            container.removeChild(particle.element);
-            particles.splice(i, 1);
-        }
+    if (Math.random() < 0.7) {
+        particle.classList.add('small');
+    } else {
+        particle.classList.add('large');
     }
+    
+    const x = Math.random() * window.innerWidth;
+    const y = window.innerHeight;
+    
+    particle.style.left = `${x}px`;
+    particle.style.top = `${y}px`;
+    
+    document.getElementById('container').appendChild(particle);
+    
+    let position = y;
+    const speed = Math.random() * 2 + 1;
+    let offsetX = 0;
+    
+    const animation = setInterval(() => {
+        position -= speed;
+        
+        const offset = checkCollision(particle, position);
+        offsetX += offset.x;
+        
+        particle.style.transform = `translate(${offsetX}px, 0)`;
+        particle.style.top = `${position}px`;
+        
+        if (position < 0) {
+            clearInterval(animation);
+            particle.remove();
+        }
+    }, 20);
 }
 
-function checkCollision(particle) {
+function checkCollision(particle, position) {
+    const logo = document.getElementById('logo');
     const logoRect = logo.getBoundingClientRect();
-    const particleRect = particle.element.getBoundingClientRect();
+    const particleRect = particle.getBoundingClientRect();
     
-    const collisionRange = 150;
+    const collisionRange = logoRect.width * 0.75;
     
     if (particleRect.left < logoRect.right + collisionRange &&
         particleRect.right > logoRect.left - collisionRange &&
@@ -82,23 +67,48 @@ function checkCollision(particle) {
     return { x: 0 };
 }
 
+setInterval(createParticle, 100);
+
+const logo = document.getElementById('logo');
 let isDragging = false;
 let previousMousePosition = { x: 0, y: 0 };
 let rotationX = 0;
 let rotationY = 0;
+let autoRotationAnimationId;
 let autoRotationSpeed = { x: 0.45, y: 0.75 };
+
+function autoRotate() {
+    if (!isDragging) {
+        rotationY += autoRotationSpeed.y;
+        rotationX += autoRotationSpeed.x;
+        updateCubeRotation();
+    }
+    autoRotationAnimationId = requestAnimationFrame(autoRotate);
+}
 
 function updateCubeRotation() {
     const cube = logo.querySelector('.cube');
     cube.style.transform = `rotateX(${rotationX}deg) rotateY(${rotationY}deg)`;
 }
 
-logo.addEventListener('mousedown', (e) => {
-    isDragging = true;
-    previousMousePosition = { x: e.clientX, y: e.clientY };
+logo.addEventListener('mousedown', startDragging);
+logo.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    startDragging(e.touches[0]);
 });
 
-document.addEventListener('mousemove', (e) => {
+function startDragging(e) {
+    isDragging = true;
+    previousMousePosition = { x: e.clientX, y: e.clientY };
+}
+
+document.addEventListener('mousemove', drag);
+document.addEventListener('touchmove', (e) => {
+    e.preventDefault();
+    drag(e.touches[0]);
+});
+
+function drag(e) {
     if (!isDragging) return;
 
     const deltaX = e.clientX - previousMousePosition.x;
@@ -110,26 +120,13 @@ document.addEventListener('mousemove', (e) => {
     updateCubeRotation();
 
     previousMousePosition = { x: e.clientX, y: e.clientY };
-});
-
-document.addEventListener('mouseup', () => {
-    isDragging = false;
-});
-
-function animate() {
-    if (!isDragging) {
-        rotationY += autoRotationSpeed.y;
-        rotationX += autoRotationSpeed.x;
-        updateCubeRotation();
-    }
-
-    if (particles.length < 50 && Math.random() < 0.1) {
-        particles.push(createParticle());
-    }
-
-    updateParticles();
-
-    requestAnimationFrame(animate);
 }
 
-animate();
+document.addEventListener('mouseup', stopDragging);
+document.addEventListener('touchend', stopDragging);
+
+function stopDragging() {
+    isDragging = false;
+}
+
+autoRotate();
