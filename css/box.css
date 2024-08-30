@@ -21,9 +21,11 @@
     width: 28.28vmin;  /* 35.36vmin * 0.8 */
     height: 28.28vmin;  /* 35.36vmin * 0.8 */
     transform-style: preserve-3d;
-    cursor: pointer;
+    /* cursor: pointer; */
+    cursor: grab; /* 設定游標為抓取型 */
     
 }
+
 
 /* 設置Logo內部立方體樣式 */
 .cube {
