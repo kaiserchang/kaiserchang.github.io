@@ -2,6 +2,11 @@ const container = document.getElementById('container');
 const logo = document.getElementById('logo');
 const particles = [];
 
+// 在 myBox.js 中添加這個函數 (手機問題)
+function isMobileLandscape() {
+    return window.matchMedia("(max-width: 896px) and (orientation: landscape)").matches;
+}
+
 function createParticle() {
     const particle = document.createElement('div');
     particle.classList.add('particle');
