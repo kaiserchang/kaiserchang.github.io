@@ -1,12 +1,29 @@
-html {
-    scroll-behavior: smooth;
-}
 
+/* 偵測在手機橫向模式 */
 @media screen and (prefers-reduced-motion: reduce) {
     html {
         scroll-behavior: auto;
+        scroll-behavior: smooth;
+    }
+    body, #container {
+        height: auto;
+        min-height: 100vh;
+        overflow-y: auto;
+    }
+
+    #logo {
+        position: relative;
+        top: auto;
+        left: auto;
+        transform: none;
+        margin: 20px auto;
+    }
+
+    .particle {
+        display: none; /* 在手機橫向模式下隱藏粒子 */
     }
 }
+
 
 body {
     background-color: black;
