@@ -1,10 +1,6 @@
 
 
-@media screen and (prefers-reduced-motion: reduce) {
-    html {
-        scroll-behavior: auto;
-        scroll-behavior: smooth;
-    }
+@media screen and (max-width: 896px) and (orientation: landscape) {
     body, #container {
         height: auto;
         min-height: 100vh;
@@ -19,10 +15,9 @@
         margin: 20px auto;
     }
 
-    .particle {
-        display: none; 
-    }
-} 
+    /* .particle {
+        display: none; /* 在手機橫向模式下隱藏粒子 */
+    } */
 
 
 
