@@ -1,4 +1,32 @@
 
+
+@media screen and (prefers-reduced-motion: reduce) {
+    html {
+        scroll-behavior: auto;
+        scroll-behavior: smooth;
+    }
+    body, #container {
+        height: auto;
+        min-height: 100vh;
+        overflow-y: auto;
+    }
+
+    #logo {
+        position: relative;
+        top: auto;
+        left: auto;
+        transform: none;
+        margin: 20px auto;
+    }
+
+    .particle {
+        display: none; 
+    }
+} 
+
+
+
+
 /* 設置容器樣式 */
 .container {
     position: fixed;
