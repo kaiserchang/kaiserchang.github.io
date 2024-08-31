@@ -67,7 +67,7 @@ function checkCollision(particle, position) {
     return { x: 0 };
 }
 
-setInterval(createParticle, 100);
+setInterval(createParticle, 1000);
 
 const logo = document.getElementById('logo');
 let isDragging = false;
