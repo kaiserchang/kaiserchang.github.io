@@ -35,7 +35,10 @@ a {
 }
 
 .header h4 {
-    margin-left: 2vmin; 
+    position: absolute;
+    transform: translateY(-50%);
+    margin-top:45px;
+    margin-left: 2.5vmin; 
 }
 
 .animation-container {
