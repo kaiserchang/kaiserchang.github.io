@@ -32,6 +32,7 @@ a {
     transform: translateY(-50%);
     margin-left: 2vmin;
     margin-top:25px;
+    text-shadow: 0 0 5px rgba(0, 0, 0, 0.8);
 }
 
 .header h4 {
@@ -39,6 +40,7 @@ a {
     transform: translateY(-50%);
     margin-top:45px;
     margin-left: 2.5vmin; 
+    text-shadow: 0 0 5px rgba(0,0,0,0.8);
 }
 
 .animation-container {
