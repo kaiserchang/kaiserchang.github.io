@@ -27,7 +27,6 @@ a {
 .header h1 {
     position: absolute;
     z-index: 2;
-    margin: 0;
     top: 50%;
     transform: translateY(-50%);
     margin-left: 2vmin;
