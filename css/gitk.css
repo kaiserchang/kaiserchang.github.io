@@ -22,6 +22,7 @@ a {
     height: 120px;
     overflow: hidden;
     left: 1vmin;
+    text-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
 }
 
 .header h1 {
