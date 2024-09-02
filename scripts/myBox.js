@@ -1,51 +1,84 @@
-const container = document.getElementById('container');
-const logo = document.getElementById('logo');
-const particles = [];
+// // 在文檔加載完成後執行
+// document.addEventListener('DOMContentLoaded', function() {
+//     // 獲取canvas元素
+//     const canvas = document.querySelector('canvas');
+    
+//     // 設置canvas的初始尺寸
+//     function setCanvasSize() {
+//       canvas.width = window.innerWidth;
+//       canvas.height = window.innerHeight;
+//     }
+    
+//     // 初始設置canvas尺寸
+//     setCanvasSize();
+    
+//     // 監聽窗口大小變化事件
+//     let resizeTimeout;
+//     window.addEventListener('resize', function() {
+//       // 清除之前的超時
+//       clearTimeout(resizeTimeout);
+      
+//       // 設置新的超時，延遲執行重置尺寸的操作
+//       resizeTimeout = setTimeout(function() {
+//         setCanvasSize();
+//         // 如果需要，在這裡重新初始化或調整particles和cube
+//       }, 250);  // 250毫秒的延遲
+//     });
+    
+//     // 禁用雙指縮放
+//     document.addEventListener('gesturestart', function(e) {
+//       e.preventDefault();
+//     });
+//   });
+
+// /* 以上是優化RWD的js. */
+
+
 
 function createParticle() {
     const particle = document.createElement('div');
     particle.classList.add('particle');
     
-    particle.classList.add(Math.random() < 0.7 ? 'small' : 'large');
+    if (Math.random() < 0.7) {
+        particle.classList.add('small');
+    } else {
+        particle.classList.add('large');
+    }
     
     const x = Math.random() * window.innerWidth;
     const y = window.innerHeight;
     
-    particle.style.transform = `translate(${x}px, ${y}px)`;
-    particle.style.position = 'absolute';
+    particle.style.left = `${x}px`;
+    particle.style.top = `${y}px`;
     
-    container.appendChild(particle);
+    document.getElementById('container').appendChild(particle);
     
-    return {
-        element: particle,
-        position: { x, y },
-        speed: Math.random() * 2 + 1,
-        offsetX: 0
-    };
-}
-
-function updateParticles() {
-    for (let i = particles.length - 1; i >= 0; i--) {
-        const particle = particles[i];
-        particle.position.y -= particle.speed;
+    let position = y;
+    const speed = Math.random() * 2 + 1;
+    let offsetX = 0;
+    
+    const animation = setInterval(() => {
+        position -= speed;
         
-        const offset = checkCollision(particle);
-        particle.offsetX += offset.x;
+        const offset = checkCollision(particle, position);
+        offsetX += offset.x;
         
-        particle.element.style.transform = `translate(${particle.position.x + particle.offsetX}px, ${particle.position.y}px)`;
+        particle.style.transform = `translate(${offsetX}px, 0)`;
+        particle.style.top = `${position}px`;
         
-        if (particle.position.y < 0) {
-            container.removeChild(particle.element);
-            particles.splice(i, 1);
+        if (position < 0) {
+            clearInterval(animation);
+            particle.remove();
         }
-    }
+    }, 20);
 }
 
-function checkCollision(particle) {
+function checkCollision(particle, position) {
+    const logo = document.getElementById('logo');
     const logoRect = logo.getBoundingClientRect();
-    const particleRect = particle.element.getBoundingClientRect();
+    const particleRect = particle.getBoundingClientRect();
     
-    const collisionRange = 150;
+    const collisionRange = logoRect.width * 0.75;
     
     if (particleRect.left < logoRect.right + collisionRange &&
         particleRect.right > logoRect.left - collisionRange &&
@@ -71,23 +104,48 @@ function checkCollision(particle) {
     return { x: 0 };
 }
 
+setInterval(createParticle, 1000);
+
+const logo = document.getElementById('logo');
 let isDragging = false;
 let previousMousePosition = { x: 0, y: 0 };
 let rotationX = 0;
 let rotationY = 0;
+let autoRotationAnimationId;
 let autoRotationSpeed = { x: 0.45, y: 0.75 };
+
+function autoRotate() {
+    if (!isDragging) {
+        rotationY += autoRotationSpeed.y;
+        rotationX += autoRotationSpeed.x;
+        updateCubeRotation();
+    }
+    autoRotationAnimationId = requestAnimationFrame(autoRotate);
+}
 
 function updateCubeRotation() {
     const cube = logo.querySelector('.cube');
     cube.style.transform = `rotateX(${rotationX}deg) rotateY(${rotationY}deg)`;
 }
 
-logo.addEventListener('mousedown', (e) => {
-    isDragging = true;
-    previousMousePosition = { x: e.clientX, y: e.clientY };
+logo.addEventListener('mousedown', startDragging);
+logo.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    startDragging(e.touches[0]);
 });
 
-document.addEventListener('mousemove', (e) => {
+function startDragging(e) {
+    isDragging = true;
+    previousMousePosition = { x: e.clientX, y: e.clientY };
+}
+
+document.addEventListener('mousemove', drag);
+document.addEventListener('touchmove', (e) => {
+    e.preventDefault();
+    drag(e.touches[0]);
+});
+
+function drag(e) {
     if (!isDragging) return;
 
     const deltaX = e.clientX - previousMousePosition.x;
@@ -99,26 +157,13 @@ document.addEventListener('mousemove', (e) => {
     updateCubeRotation();
 
     previousMousePosition = { x: e.clientX, y: e.clientY };
-});
-
-document.addEventListener('mouseup', () => {
-    isDragging = false;
-});
-
-function animate() {
-    if (!isDragging) {
-        rotationY += autoRotationSpeed.y;
-        rotationX += autoRotationSpeed.x;
-        updateCubeRotation();
-    }
-
-    if (particles.length < 50 && Math.random() < 0.1) {
-        particles.push(createParticle());
-    }
-
-    updateParticles();
-
-    requestAnimationFrame(animate);
 }
 
-animate();
+document.addEventListener('mouseup', stopDragging);
+document.addEventListener('touchend', stopDragging);
+
+function stopDragging() {
+    isDragging = false;
+}
+
+autoRotate();
