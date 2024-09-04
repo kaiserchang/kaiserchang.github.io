@@ -1,0 +1,554 @@
+<html><head><base href="https://webcreation.example.com/cat-dog-classifier/"><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>貓星人與汪星人識別器</title>
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap');
+
+    :root {
+        --primary-color: #1a1a1a;
+        --secondary-color: #2c3e50;
+        --accent-color: #3498db;
+        --background-color: #121212;
+        --text-color: #ffffff;
+        --button-color: #2980b9;
+        --button-hover-color: #3498db;
+        --border-color: #34495e;
+    }
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: 'Noto Sans TC', sans-serif;
+        background-color: var(--background-color);
+        color: var(--text-color);
+        line-height: 1.6;
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+    }
+
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    header {
+        background-color: var(--primary-color);
+        color: white;
+        text-align: center;
+        padding: 10px;
+        width: 100%;
+    }
+
+    h1 {
+        font-size: 2.5em;
+        margin-bottom: 2.5px;
+    }
+
+    .version {
+        font-size: 0.8em;
+        opacity: 0.8;
+    }
+
+    main {
+        flex-grow: 1;
+        width: 100%;
+        max-width: 800px;
+        margin: 20px auto;
+        background-color: var(--primary-color);
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+    }
+
+    h2 {
+        color: var(--text-color);
+        margin-bottom: 3.5px;
+    }
+
+    p {
+        margin-bottom: 7px;
+    }
+
+    .button-group {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+    }
+
+    button {
+        background-color: var(--button-color);
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background-color 0.3s, transform 0.1s;
+        font-size: 1em;
+        margin: 5px;
+        flex-grow: 1;
+        max-width: calc(50% - 10px);
+    }
+
+    button:hover {
+        background-color: var(--button-hover-color);
+        transform: translateY(-2px);
+    }
+
+    button:active {
+        transform: translateY(0);
+    }
+
+    button:disabled {
+        background-color: var(--border-color);
+        cursor: not-allowed;
+    }
+
+    #modelStatus {
+        text-align: center;
+        margin-bottom: 15px;
+        font-weight: bold;
+        color: var(--accent-color);
+    }
+
+    #imageFrame {
+        width: 100%;
+        height: 300px;
+        border: 2px dashed var(--border-color);
+        border-radius: 12px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-bottom: 20px;
+        overflow: hidden;
+        position: relative;
+        background-color: var(--secondary-color);
+        transition: all 0.3s ease;
+    }
+
+    #imageFrame:hover {
+        border-color: var(--accent-color);
+    }
+
+    #imageFrame img, #imageFrame video {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+        border-radius: 8px;
+    }
+
+    #dropOverlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(52, 152, 219, 0.7);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        font-size: 1.5em;
+        color: white;
+        border-radius: 12px;
+    }
+
+    #result {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 20px;
+    }
+
+    .animal {
+        text-align: center;
+        width: 45%;
+    }
+
+    .icon {
+        width: 80px;
+        height: 80px;
+        margin-bottom: 10px;
+        object-fit: cover;
+        border-radius: 50%;
+    }
+
+    .probability-bar {
+        height: 20px;
+        background-color: var(--secondary-color);
+        border-radius: 10px;
+        overflow: hidden;
+        margin-top: 10px;
+    }
+
+    .probability-fill {
+        height: 100%;
+        background-color: var(--accent-color);
+        transition: width 0.5s ease-in-out;
+    }
+
+    #chat {
+        margin-top: 30px;
+        border-top: 1px solid var(--border-color);
+        padding-top: 20px;
+    }
+
+    #chatContent {
+        max-height: 200px;
+        overflow-y: auto;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        padding: 10px;
+        background-color: var(--secondary-color);
+    }
+
+    footer {
+        background-color: var(--primary-color);
+        color: white;
+        text-align: center;
+        padding: 10px 0;
+        width: 100%;
+    }
+
+    @media (max-width: 600px) {
+        .button-group {
+            flex-direction: column;
+        }
+
+        button {
+            margin-bottom: 10px;
+            max-width: 100%;
+        }
+
+        #result {
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .animal {
+            width: 100%;
+            margin-bottom: 20px;
+        }
+    }
+</style>
+</head>
+<body>
+    <header>
+        <h1 style="font-size: 7.5vmin;">喵星人與汪星人識別器 <span class="version">v2.5</span></h1>
+        <h2 style="font-size: 4vmin;">使用方法說明 [請勿使用line內建瀏覽器]</h2>
+        <p>透過拍照或上傳圖片來識別貓或狗。<br>您可以：</p>
+        <ul>
+            <li>使用攝影機拍攝照片<br>或選取照片上傳辨識<br>（手機或筆電webcam）</li>
+            <li>拖曳圖片到下方框框（電腦）</li>
+            <li>或按鈕上傳本地圖片文件</li>
+        </ul>
+    </header>
+    <main class="container">
+        <p>目前使用預訓練的 MobileNet 模型進行識別，準確度較高。</p>
+
+        <div class="button-group">
+            <button id="uploadButton">拍照或上傳圖片</button>
+            <button id="cameraButton">啟動攝影機</button>
+            <button id="captureButton">拍照識別</button>
+            <button id="modelButton">替換自訂模型</button>
+            <!-- <button id="downloadButton">下載程式和模型</button> -->
+        </div>
+
+        <div id="modelStatus">模型狀態：準備中...</div>
+
+        <div id="imageFrame">
+            <p id="dragInstruction">將圖片拖曳至此或使用攝影機拍攝</p>
+            <div id="dropOverlay">放開以上傳圖片</div>
+        </div>
+
+        <div id="result">
+            <div class="animal">
+                 <img src="https://kaiserchang.github.io/img/colab_cute/STRIPES.gif" style="height: 50%; " alt="貓的圖示" >
+                <p>貓的機率: <span id="catProb">0%</span></p>
+                <div class="probability-bar">
+                    <div class="probability-fill" id="catProbBar" style="width: 0%;"></div>
+                </div>
+            </div>
+            <div class="animal">
+                <img src="https://kaiserchang.github.io/img/colab_cute/oreo2.gif" style="height:50%;" alt="狗的圖示" >
+                <p>狗的機率: <span id="dogProb">0%</span></p>
+                <div class="probability-bar">
+                    <div class="probability-fill" id="dogProbBar" style="width: 0%;"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="chat">
+            <h3>系統消息</h3>
+            <div id="chatContent"></div>
+        </div>
+    </main>
+
+    <footer>
+        <p>© 2024 喵星人與汪星人識別器. 保留所有權利。</p>
+    </footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.11.0/dist/tf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet@1.0.0"></script>
+<script>
+let model;
+let camera;
+
+// 載入預訓練的 MobileNet 模型
+async function loadModel() {
+    try {
+        updateModelStatus("正在載入 MobileNet 模型...請稍待約15秒");
+        model = await mobilenet.load();
+        console.log('MobileNet 模型已載入');
+        updateModelStatus("MobileNet 模型已準備就緒");
+        updateChat("預訓練的 MobileNet 模型已成功載入，可以開始識別貓狗圖片。");
+    } catch (error) {
+        console.error('載入模型時發生錯誤:', error);
+        updateModelStatus("模型載入失敗");
+        updateChat("載入 MobileNet 模型時發生錯誤，請重新載入頁面或檢查網路連接。");
+    }
+}
+
+// 初始化
+window.onload = () => {
+    loadModel();
+    document.getElementById('cameraButton').addEventListener('click', startCamera);
+    document.getElementById('captureButton').addEventListener('click', captureImage);
+    document.getElementById('uploadButton').addEventListener('click', uploadImage);
+    document.getElementById('modelButton').addEventListener('click', replaceModel);
+    document.getElementById('downloadButton').addEventListener('click', downloadProgramAndModel);
+    
+    const imageFrame = document.getElementById('imageFrame');
+    const dropOverlay = document.getElementById('dropOverlay');
+
+    imageFrame.addEventListener('dragenter', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        imageFrame.classList.add('drag-over');
+        dropOverlay.style.display = 'flex';
+    });
+
+    imageFrame.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+    });
+
+    imageFrame.addEventListener('dragleave', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (e.target === imageFrame) {
+            imageFrame.classList.remove('drag-over');
+            dropOverlay.style.display = 'none';
+        }
+    });
+
+    imageFrame.addEventListener('drop', handleDrop);
+};
+
+// 啟動攝影機
+async function startCamera() {
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        camera = document.createElement('video');
+        camera.srcObject = stream;
+        camera.autoplay = true;
+        document.getElementById('imageFrame').innerHTML = '';
+        document.getElementById('imageFrame').appendChild(camera);
+        document.getElementById('captureButton').disabled = false;
+        updateChat("攝影機已成功啟動，可以進行拍照。");
+    } catch (error) {
+        console.error('無法啟動攝影機:', error);
+        updateChat("無法啟動攝影機，請確保您的裝置有攝影機並已授權使用。");
+    }
+}
+
+// 拍照並識別
+function captureImage() {
+    if (!camera) {
+        console.error('攝影機未啟動');
+        updateChat("請先啟動攝影機再進行拍照。");
+        return;
+    }
+    const canvas = document.createElement('canvas');
+    canvas.width = camera.videoWidth;
+    canvas.height = camera.videoHeight;
+    canvas.getContext('2d').drawImage(camera, 0, 0);
+    const imageData = canvas.toDataURL('image/jpeg');
+    const img = new Image();
+    img.onload = () => {
+        document.getElementById('imageFrame').innerHTML = '';
+        document.getElementById('imageFrame').appendChild(img);
+        classifyImage(img);
+    };
+    img.src = imageData;
+    updateChat("已拍攝照片並自動進行識別。");
+}
+
+// 上傳圖片
+function uploadImage() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.onchange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const img = new Image();
+                img.onload = () => {
+                    document.getElementById('imageFrame').innerHTML = '';
+                    document.getElementById('imageFrame').appendChild(img);
+                    classifyImage(img);
+                };
+                img.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+            updateChat("已上傳圖片並自動進行識別。");
+        }
+    };
+    input.click();
+}
+
+// 處理拖放圖片
+function handleDrop(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    document.getElementById('imageFrame').classList.remove('drag-over');
+    document.getElementById('dropOverlay').style.display = 'none';
+
+    const file = e.dataTransfer.files[0];
+    if (file && file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            const img = new Image();
+            img.onload = () => {
+                document.getElementById('imageFrame').innerHTML = '';
+                document.getElementById('imageFrame').appendChild(img);
+                classifyImage(img);
+            };
+            img.src = event.target.result;
+        };
+        reader.readAsDataURL(file);
+        updateChat("已接收拖放的圖片並自動進行識別。");
+    } else {
+        updateChat("請拖放有效的圖片文件。");
+    }
+}
+
+// 圖像分類
+async function classifyImage(image) {
+    if (!model) {
+        console.error('模型尚未載入');
+        updateChat("模型尚未載入完成，請稍後再試。");
+        return;
+    }
+    
+    try {
+        const predictions = await model.classify(image);
+        let catProb = 0;
+        let dogProb = 0;
+
+        // 分析預測結果
+        predictions.forEach(prediction => {
+            if (prediction.className.toLowerCase().includes('cat')) {
+                catProb += prediction.probability;
+            } else if (prediction.className.toLowerCase().includes('dog')) {
+                dogProb += prediction.probability;
+            }
+        });
+
+        // 正規化機率
+        const total = catProb + dogProb;
+        if (total > 0) {
+            catProb = catProb / total;
+            dogProb = dogProb / total;
+        }
+
+        document.getElementById('catProb').textContent = `${(catProb * 100).toFixed(2)}%`;
+        document.getElementById('dogProb').textContent = `${(dogProb * 100).toFixed(2)}%`;
+        document.getElementById('catProbBar').style.width = `${catProb * 100}%`;
+        document.getElementById('dogProbBar').style.width = `${dogProb * 100}%`;
+
+        updateChat(`識別結果 - 貓的機率: ${(catProb * 100).toFixed(2)}%, 狗的機率: ${(dogProb * 100).toFixed(2)}%`);
+    } catch (error) {
+        console.error('識別過程中發生錯誤:', error);
+        updateChat("識別過程中發生錯誤，請稍後再試。");
+    }
+}
+
+// 替換模型
+function replaceModel() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
+    input.onchange = async (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            try {
+                updateModelStatus("正在載入自訂模型...");
+                const newModel = await tf.loadLayersModel(tf.io.browserFiles([file]));
+                model = newModel;
+                console.log('模型已成功替換');
+                updateModelStatus("自訂模型已準備就緒");
+                updateChat("模型已成功替換為自訂模型。請注意，自訂模型可能需要特定的預處理步驟。");
+            } catch (error) {
+                console.error('替換模型時發生錯誤:', error);
+                updateModelStatus("自訂模型載入失敗");
+                updateChat("替換模型時發生錯誤，請確保選擇了正確的模型文件。");
+            }
+        }
+    };
+    input.click();
+}
+
+// 更新對話記錄
+function updateChat(message) {
+    const chatContent = document.getElementById('chatContent');
+    chatContent.innerHTML += `<p>${message}</p>`;
+    chatContent.scrollTop = chatContent.scrollHeight;
+}
+
+// 更新模型狀態
+function updateModelStatus(status) {
+    document.getElementById('modelStatus').textContent = `模型狀態：${status}`;
+}
+
+// 下載程式和模型
+async function downloadProgramAndModel() {
+    try {
+        // 獲取當前頁面的 HTML
+        const htmlContent = document.documentElement.outerHTML;
+
+        // 創建一個 Blob 對象，包含 HTML 內容
+        const htmlBlob = new Blob([htmlContent], { type: 'text/html' });
+
+        // 創建一個下載鏈接並觸發下載
+        const htmlLink = document.createElement('a');
+        htmlLink.href = URL.createObjectURL(htmlBlob);
+        htmlLink.download = 'cat_dog_classifier.html';
+        htmlLink.click();
+
+        // 下載預訓練的 MobileNet 模型
+        if (model) {
+            await model.save('downloads://mobilenet_model');
+            updateChat("程式和模型下載已開始。請檢查您的下載資料夾。");
+        } else {
+            updateChat("模型尚未載入，無法下載。請等待模型載入完成後再試。");
+        }
+    } catch (error) {
+        console.error('下載過程中發生錯誤:', error);
+        updateChat("下載過程中發生錯誤，請稍後再試。");
+    }
+}
+
+updateChat("歡迎使用貓星人與汪星人識別器！");
+updateChat("本應用程式現在使用預訓練的 MobileNet 模型進行識別，準確度較高。");
+updateChat("如果您有任何問題或建議，請隨時告訴我們。");
+/* updateChat("您現在可以下載程式和預訓練模型，以便離線使用。"); */
+</script>
+</body></html>
