@@ -7,6 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>貓星人與汪星人識別器</title>
     <style>
+        /* 保留原有的樣式 */
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap');
 
         :root {
@@ -264,11 +265,10 @@
     </header>
     <main class="container">
         <p>目前使用預訓練的 MobileNet 模型進行識別，準確度較高。</p>
-
         <div class="button-group">
-            <button id="uploadButton">拍照或上傳圖片</button>
-            <button id="cameraButton">啟動攝影機</button>
+            <button id="cameraButton">啟動攝影機（手機）</button>
             <button id="captureButton">拍照識別</button>
+            <button id="uploadButton">WebCam拍照或上傳圖片（電腦）</button>
             <button id="modelButton">替換自訂模型</button>
             <!-- <button id="downloadButton">下載程式和模型</button> -->
         </div>
@@ -338,7 +338,6 @@
             const imageFrame = document.getElementById('imageFrame');
             const dropOverlay = document.getElementById('dropOverlay');
 
-            // 修正拖拉功能
             ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
                 imageFrame.addEventListener(eventName, preventDefaults, false);
                 document.body.addEventListener(eventName, preventDefaults, false);
@@ -373,13 +372,13 @@
         // 啟動攝影機
         async function startCamera() {
             try {
-                // 修正：先嘗試使用後置攝影機，如果失敗則使用前置攝影機
                 const stream = await navigator.mediaDevices.getUserMedia({
                     video: { facingMode: { ideal: "environment" } }
                 });
                 camera = document.createElement('video');
                 camera.srcObject = stream;
                 camera.autoplay = true;
+                camera.playsInline = true; // 確保在iOS設備上正確顯示
                 document.getElementById('imageFrame').innerHTML = '';
                 document.getElementById('imageFrame').appendChild(camera);
                 document.getElementById('captureButton').disabled = false;
@@ -402,14 +401,7 @@
             canvas.height = camera.videoHeight;
             canvas.getContext('2d').drawImage(camera, 0, 0);
             const imageData = canvas.toDataURL('image/jpeg');
-            const img = new Image();
-            img.onload = () => {
-                document.getElementById('imageFrame').innerHTML = '';
-                document.getElementById('imageFrame').appendChild(img);
-                classifyImage(img);
-            };
-            img.src = imageData;
-            updateChat("已拍攝照片並自動進行識別。");
+            processImageData(imageData);
         }
 
         // 上傳圖片
@@ -422,16 +414,9 @@
                 if (file) {
                     const reader = new FileReader();
                     reader.onload = (event) => {
-                        const img = new Image();
-                        img.onload = () => {
-                            document.getElementById('imageFrame').innerHTML = '';
-                            document.getElementById('imageFrame').appendChild(img);
-                            classifyImage(img);
-                        };
-                        img.src = event.target.result;
+                        processImageData(event.target.result);
                     };
                     reader.readAsDataURL(file);
-                    updateChat("已上傳圖片並自動進行識別。");
                 }
             };
             input.click();
@@ -445,19 +430,24 @@
             if (file && file.type.startsWith('image/')) {
                 const reader = new FileReader();
                 reader.onload = (event) => {
-                    const img = new Image();
-                    img.onload = () => {
-                        document.getElementById('imageFrame').innerHTML = '';
-                        document.getElementById('imageFrame').appendChild(img);
-                        classifyImage(img);
-                    };
-                    img.src = event.target.result;
+                    processImageData(event.target.result);
                 };
                 reader.readAsDataURL(file);
-                updateChat("已接收拖放的圖片並自動進行識別。");
             } else {
                 updateChat("請拖放有效的圖片文件。");
             }
+        }
+
+        // 處理圖像數據
+        function processImageData(imageData) {
+            const img = new Image();
+            img.onload = () => {
+                document.getElementById('imageFrame').innerHTML = '';
+                document.getElementById('imageFrame').appendChild(img);
+                classifyImage(img);
+            };
+            img.src = imageData;
+            updateChat("圖片已載入，正在進行識別...");
         }
 
         // 圖像分類
@@ -470,7 +460,18 @@
 
             try {
                 updateChat("正在進行圖像識別，請稍候...");
-                const predictions = await model.classify(image);
+
+                // 將圖像轉換為tensor
+                const tfImg = tf.browser.fromPixels(image)
+                    .resizeBilinear([224, 224]) // 調整大小以符合MobileNet的輸入要求
+                    .toFloat()
+                    .expandDims();
+
+                const predictions = await model.classify(tfImg);
+
+                // 釋放tensor以避免記憶體洩漏
+                tfImg.dispose();
+
                 let catProb = 0;
                 let dogProb = 0;
 
