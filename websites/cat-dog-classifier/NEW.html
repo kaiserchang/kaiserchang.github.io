@@ -99,6 +99,19 @@ h1, h2 {
   cursor: pointer;
   border-radius: 5px;
 }
+#switchCamera {
+  background-color: #3498db;
+  border: none;
+  color: white;
+  padding: 15px 32px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 4px 2px;
+  cursor: pointer;
+  border-radius: 5px;
+}
 #video {
   display: none;
   width: 100%;
@@ -133,6 +146,7 @@ h1, h2 {
   </div>
   <input type="file" id="fileInput" style="display: none;" accept="image/*">
   <button id="cameraButton">開啟相機</button>
+  <button id="switchCamera" style="display: none;">切換相機</button>
   <video id="video" autoplay playsinline></video>
   <div id="result"></div>
 
@@ -177,6 +191,8 @@ h1, h2 {
     const uploadModelButton = document.getElementById('uploadModel');
     const cameraButton = document.getElementById('cameraButton');
     const video = document.getElementById('video');
+    let currentFacingMode = 'user'; // 默認使用前置攝像頭
+    const switchCameraButton = document.getElementById('switchCamera');
 
     // 載入默認模型
     mobilenet.load().then(loadedModel => {
@@ -295,13 +311,16 @@ h1, h2 {
     });
 
     // 開啟相機
-    cameraButton.addEventListener('click', async () => {
+    async function openCamera() {
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: currentFacingMode }
+        });
         video.srcObject = stream;
         video.style.display = 'block';
         cameraButton.textContent = '拍照';
-        cameraButton.removeEventListener('click', arguments.callee);
+        switchCameraButton.style.display = 'inline-block';
+        cameraButton.removeEventListener('click', openCamera);
         cameraButton.addEventListener('click', capturePhoto);
         addChatMessage('用戶開啟了相機。');
       } catch (error) {
@@ -309,7 +328,19 @@ h1, h2 {
         addChatMessage('無法開啟相機，請確保您的設備支援並已授權使用相機。');
         alert('無法開啟相機，請確保您的設備支援並已授權使用相機。');
       }
-    });
+    }
+
+    // 切換相機
+    async function switchCamera() {
+      currentFacingMode = currentFacingMode === 'user' ? 'environment' : 'user';
+      const stream = video.srcObject;
+      stream.getTracks().forEach(track => track.stop());
+      await openCamera();
+      addChatMessage('用戶切換了相機。');
+    }
+
+    cameraButton.addEventListener('click', openCamera);
+    switchCameraButton.addEventListener('click', switchCamera);
 
     // 拍照並辨識
     function capturePhoto() {
@@ -324,8 +355,9 @@ h1, h2 {
       classifyImage(petImage);
       video.style.display = 'none';
       cameraButton.textContent = '開啟相機';
+      switchCameraButton.style.display = 'none';
       cameraButton.removeEventListener('click', capturePhoto);
-      cameraButton.addEventListener('click', arguments.callee);
+      cameraButton.addEventListener('click', openCamera);
       addChatMessage('用戶拍攝了一張照片並進行辨識。');
     }
 
@@ -336,41 +368,3 @@ h1, h2 {
     }
   </script>
 </body></html>
-
-感謝您的新需求，我已經按照您的要求對網頁進行了以下修改：
-
-1. RWD（響應式網頁設計）：
-   - 調整了 CSS，使用了相對單位和媒體查詢，確保網頁在不同設備上都能良好顯示。
-   - 對小屏幕設備進行了特別優化，調整了字體大小、圖片尺寸等。
-
-2. 手機相機拍照功能：
-   - 新增了一個「開啟相機」按鈕。
-   - 實現了開啟相機、拍照、及直接辨識的功能。
-   - 添加了相關的錯誤處理和用戶提示。
-
-3. 對話記錄：
-   - 保留了原有的對話記錄功能，並在新功能中也添加了相應的記錄。
-
-主要變更和新增的功能：
-
-1. CSS 調整：
-   - 使用相對單位（如百分比、em）來定義寬度和間距。
-   - 添加了媒體查詢 `@media (max-width: 600px)` 來針對小屏幕設備進行優化。
-
-2. 相機功能：
-   - 新增 `<video>` 元素用於顯示相機畫面。
-   - 實現 `cameraButton` 的點擊事件處理，包括開啟相機和拍照兩個功能。
-   - 使用 `navigator.mediaDevices.getUserMedia()` 來訪問設備相機。
-   - 實現 `capturePhoto()` 函數來捕獲照片並進行辨識。
-
-3. 錯誤處理：
-   - 為相機操作添加了錯誤處理，當無法訪問相機時會給出提示。
-
-4. 用戶體驗優化：
-   - 相機開啟後，「開啟相機」按鈕會變為「拍照」按鈕。
-   - 拍照後，相機畫面會隱藏，顯示拍攝的照片。
-
-5. 對話記錄：
-   - 在開啟相機和拍照時都添加了相應的對話記錄。
-
-這些修改使得網頁更加適合在各種設備上使用，尤其是在手機上可以直接使用相機拍照並進行辨識。如果您還有任何其他需求或者需要進一步調整，請隨時告訴我。
