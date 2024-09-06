@@ -162,7 +162,7 @@ h1, h2 {
       <div class="accuracy" id="catAccuracy">貓: 0%</div>
     </div>
     <div class="predictionBox">
-      <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIiB2aWV3Qm94PSIwIDAgMjAwIDIwMCI+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0iI2VlZSIvPjxwYXRoIGQ9Ik0xMDAgNjBjLTIyLjEgMC00MCAxNy45LTQwIDQwczE3LjkgNDAgNDAgNDAgNDAtMTcuOSA0MC00MC0xNy45LTQwLTQwLTQwem0yMCAzMGMtNS41IDAtMTAgNC41LTEwIDEwczQuNSAxMCAxMCAxMCAxMC00LjUgMTAtMTAtNC41LTEwLTEwLTEuem0tNDAgMGMtNS41IDAtMTAgNC41LTEwIDEwczQuNSAxMCAxMCAxMCAxMC00LjUgMTAtMTAtNC41LTEwLTEwLTEweiIgZmlsbD0iIzMzMyIvPjxwYXRoIGQ9Ik0xMDAgMTQwYzExIDAgMjAtOSAyMC0yMHMtOS0yMC0yMC0yMC0yMCA5LTIwIDIwIDkgMjAgMjAgMjB6IiBmaWxsPSIjMzMzIi8+PC9zdmc+" alt="狗狗圖示">
+      <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIiB2aWV3Qm94PSIwIDAgMjAwIDIwMCI+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0iI2VlZSIvPjxwYXRoIGQ9Ik0xMDAgNjBjLTIyLjEgMC00MCAxNy45LTQwIDQwczE3LjkgNDAgNDAgNDAgNDAtMTcuOSA0MC00MC0xNy45LTQwLTQwLTQwem0yMCAzMGMtNS41IDAtMTAgNC41LTEwIDEwczQuNSAxMCAxMCAxMCAxMC00LjUgMTAtMTAtNC41LTEwLTEwLTEwem0tNDAgMGMtNS41IDAtMTAgNC41LTEwIDEwczQuNSAxMCAxMCAxMCAxMC00LjUgMTAtMTAtNC41LTEwLTEwLTEweiIgZmlsbD0iIzMzMyIvPjxwYXRoIGQ9Ik0xMDAgMTQwYzExIDAgMjAtOSAyMC0yMHMtOS0yMC0yMC0yMC0yMCA5LTIwIDIwIDkgMjAgMjAgMjB6IiBmaWxsPSIjMzMzIi8+PC9zdmc+" alt="狗狗圖示">
       <div class="accuracy" id="dogAccuracy">狗: 0%</div>
     </div>
   </div>
@@ -259,9 +259,8 @@ h1, h2 {
     // 分類圖片
     async function classifyImage(img) {
       try {
-        console.log('開始分類圖像');
         const predictions = await model.classify(img);
-        console.log('分類結果:', predictions);
+        console.log(predictions);
 
         let isPet = false;
         let petType = '';
