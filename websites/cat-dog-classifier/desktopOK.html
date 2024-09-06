@@ -111,7 +111,7 @@ h1, h2 {
   cursor: pointer;
   border-radius: 5px;
 }
-#mobileCameraButton {
+#switchCamera {
   background-color: #3498db;
   border: none;
   color: white;
@@ -141,14 +141,6 @@ h1, h2 {
     width: 60px;
     height: 60px;
   }
-  #cameraButton {
-    display: none;
-  }
-}
-@media (min-width: 601px) {
-  #mobileCameraButton {
-    display: none;
-  }
 }
 </style>
 </head>
@@ -160,8 +152,8 @@ h1, h2 {
     <video id="video" autoplay playsinline></video>
   </div>
   <input type="file" id="fileInput" style="display: none;" accept="image/*">
-  <button id="cameraButton">開啟WebCam</button>
-  <button id="mobileCameraButton">開啟手機相機</button>
+  <button id="cameraButton">開啟相機</button>
+  <button id="switchCamera" style="display: none;">切換相機</button>
   <div id="result"></div>
 
   <div id="predictionImages">
@@ -206,7 +198,8 @@ h1, h2 {
     const modelInput = document.getElementById('modelInput');
     const uploadModelButton = document.getElementById('uploadModel');
     const cameraButton = document.getElementById('cameraButton');
-    const mobileCameraButton = document.getElementById('mobileCameraButton');
+    let currentFacingMode = 'environment';
+    const switchCameraButton = document.getElementById('switchCamera');
 
     mobilenet.load().then(loadedModel => {
       model = loadedModel;
@@ -349,78 +342,10 @@ h1, h2 {
 
     async function openCamera() {
       try {
-        console.log('嘗試開啟WebCam');
-        const constraints = {
-          video: true
-        };
-        const stream = await navigator.mediaDevices.getUserMedia(constraints);
-        video.srcObject = stream;
-        video.style.display = 'block';
-        petImage.style.display = 'none';
-        dropText.style.display = 'none';
-        cameraButton.textContent = '拍照';
-        cameraButton.removeEventListener('click', openCamera);
-        cameraButton.addEventListener('click', capturePhoto);
-        addChatMessage('用戶成功開啟了WebCam。');
-        console.log('WebCam成功開啟');
-
-        result.textContent = '';
-        catAccuracy.textContent = '貓: 0%';
-        dogAccuracy.textContent = '狗: 0%';
-      } catch (error) {
-        console.error('無法開啟WebCam:', error);
-        addChatMessage('無法開啟WebCam，請確保您的設備支援並已授權使用WebCam。錯誤信息：' + error.message);
-        alert('無法開啟WebCam，請確保您的設備支援並已授權使用WebCam。錯誤信息：' + error.message);
-      }
-    }
-
-    function capturePhoto() {
-      if (!video.srcObject) {
-        console.error('WebCam未開啟');
-        addChatMessage('無法拍照，WebCam未開啟。');
-        alert('無法拍照，WebCam未開啟。請先開啟WebCam。');
-        return;
-      }
-      
-      const canvas = document.createElement('canvas');
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-      const context = canvas.getContext('2d');
-      context.drawImage(video, 0, 0, canvas.width, canvas.height);
-      
-      petImage.src = canvas.toDataURL('image/jpeg');
-      petImage.alt = '拍攝的寵物照片';
-      petImage.style.display = 'block';
-      video.style.display = 'none';
-      
-      result.textContent = '';
-      catAccuracy.textContent = '貓: 0%';
-      dogAccuracy.textContent = '狗: 0%';
-
-      petImage.onload = () => {
-        console.log('圖像已加載，開始分類');
-        classifyImage(petImage).catch(error => {
-          console.error('圖像分類失敗:', error);
-          addChatMessage('圖像分類失敗，請稍後再試。錯誤信息：' + error.message);
-        });
-      };
-      
-      cameraButton.textContent = '開啟WebCam';
-      cameraButton.removeEventListener('click', capturePhoto);
-      cameraButton.addEventListener('click', openCamera);
-      addChatMessage('用戶使用WebCam拍攝了一張照片並進行辨識。');
-      
-      const stream = video.srcObject;
-      const tracks = stream.getTracks();
-      tracks.forEach(track => track.stop());
-    }
-
-    async function openMobileCamera() {
-      try {
-        console.log('嘗試開啟手機相機');
+        console.log('嘗試開啟相機，當前模式：', currentFacingMode);
         const constraints = {
           video: {
-            facingMode: 'environment'
+            facingMode: { ideal: currentFacingMode }
           }
         };
         const stream = await navigator.mediaDevices.getUserMedia(constraints);
@@ -428,27 +353,28 @@ h1, h2 {
         video.style.display = 'block';
         petImage.style.display = 'none';
         dropText.style.display = 'none';
-        mobileCameraButton.textContent = '拍照';
-        mobileCameraButton.removeEventListener('click', openMobileCamera);
-        mobileCameraButton.addEventListener('click', captureMobilePhoto);
-        addChatMessage('用戶成功開啟了手機相機。');
-        console.log('手機相機成功開啟');
+        cameraButton.textContent = '拍照';
+        switchCameraButton.style.display = 'inline-block';
+        cameraButton.removeEventListener('click', openCamera);
+        cameraButton.addEventListener('click', capturePhoto);
+        addChatMessage('用戶成功開啟了相機。');
+        console.log('相機成功開啟');
 
         result.textContent = '';
         catAccuracy.textContent = '貓: 0%';
         dogAccuracy.textContent = '狗: 0%';
       } catch (error) {
-        console.error('無法開啟手機相機:', error);
-        addChatMessage('無法開啟手機相機，請確保您的設備支援並已授權使用相機。錯誤信息：' + error.message);
-        alert('無法開啟手機相機，請確保您的設備支援並已授權使用相機。錯誤信息：' + error.message);
+        console.error('無法開啟相機:', error);
+        addChatMessage('無法開啟相機，請確保您的設備支援並已授權使用相機。錯誤信息：' + error.message);
+        alert('無法開啟相機，請確保您的設備支援並已授權使用相機。錯誤信息：' + error.message);
       }
     }
 
-    function captureMobilePhoto() {
+    function capturePhoto() {
       if (!video.srcObject) {
-        console.error('手機相機未開啟');
-        addChatMessage('無法拍照，手機相機未開啟。');
-        alert('無法拍照，手機相機未開啟。請先開啟手機相機。');
+        console.error('相機未開啟');
+        addChatMessage('無法拍照，相機未開啟。');
+        alert('無法拍照，相機未開啟。請先開啟相機。');
         return;
       }
       
@@ -475,17 +401,16 @@ h1, h2 {
         });
       };
       
-      mobileCameraButton.textContent = '開啟手機相機';
-      mobileCameraButton.removeEventListener('click', captureMobilePhoto);
-      mobileCameraButton.addEventListener('click', openMobileCamera);
-      addChatMessage('用戶使用手機相機拍攝了一張照片並進行辨識。');
+      cameraButton.textContent = '開啟相機';
+      switchCameraButton.style.display = 'none';
+      cameraButton.removeEventListener('click', capturePhoto);
+      cameraButton.addEventListener('click', openCamera);
+      addChatMessage('用戶拍攝了一張照片並進行辨識。');
       
       const stream = video.srcObject;
       const tracks = stream.getTracks();
       tracks.forEach(track => track.stop());
     }
-
-    mobileCameraButton.addEventListener('click', openMobileCamera);
 
     function addChatMessage(message) {
       const chatItem = document.createElement('li');
@@ -494,6 +419,14 @@ h1, h2 {
     }
 
     cameraButton.addEventListener('click', openCamera);
+
+    switchCameraButton.addEventListener('click', () => {
+      currentFacingMode = currentFacingMode === 'user' ? 'environment' : 'user';
+      const stream = video.srcObject;
+      const tracks = stream.getTracks();
+      tracks.forEach(track => track.stop());
+      openCamera();
+    });
 
     window.addEventListener('unhandledrejection', function(event) {
       console.error('Unhandled rejection (promise: ', event.promise, ', reason: ', event.reason, ').');
