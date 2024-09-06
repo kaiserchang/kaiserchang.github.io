@@ -158,7 +158,7 @@ h1, h2 {
 
   <div id="predictionImages">
     <div class="predictionBox">
-      <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIiB2aWV3Qm94PSIwIDAgMjAwIDIwMCI+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0iI2VlZSIvPjxwYXRoIGQ9Ik0xMDAgNjBjLTIyLjEgMC00MCAxNy45LTQwIDQ0MHMxNy45IDQwIDQwIDQwIDQ0MC0xNy45IDQwLTQwLTQwLTQwem0yMCAzMGMtNS41IDAtMTAgNC41LTEwIDEwczQuNSAxMCAxMCAxMCAxMC00LjUgMTAtMTAtNC41LTEwLTEwLTEuem0tNDAgMGMtNS41IDAtMTAgNC41LTEwIDEwczQuNSAxMCAxMCAxMCAxMC00LjUgMTAtMTAtNC41LTEwLTEwLTEweiIgZmlsbD0iIzMzMyIvPjxwYXRoIGQ9Ik0xMDAgMTQwYzExIDAgMjAtOSAyMC0yMHMtOS0yMC0yMC0yMC0yMCA5LTIwIDIwIDkgMjAgMjAgMjB6IiBmaWxsPSIjMzMzIi8+PC9zdmc+" alt="貓咪圖示">
+      <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIiB2aWV3Qm94PSIwIDAgMjAwIDIwMCI+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0iI2VlZSIvPjxwYXRoIGQ9Ik0xMDAgNjBjLTIyLjEgMC00MCAxNy45LTQwIDQwczE3LjkgNDAgNDAgNDAgNDAtMTcuOSA0MC00MC0xNy45LTQwLTQwLTQwem0yMCAzMGMtNS41IDAtMTAgNC41LTEwIDEwczQuNSAxMCAxMCAxMCAxMC00LjUgMTAtMTAtNC41LTEwLTEwLTEwem0tNDAgMGMtNS41IDAtMTAgNC41LTEwIDEwczQuNSAxMCAxMCAxMCAxMC00LjUgMTAtMTAtNC41LTEwLTEwLTEweiIgZmlsbD0iIzMzMyIvPjwvc3ZnPg==" alt="貓咪圖示">
       <div class="accuracy" id="catAccuracy">貓: 0%</div>
     </div>
     <div class="predictionBox">
@@ -334,11 +334,6 @@ h1, h2 {
         cameraButton.removeEventListener('click', openCamera);
         cameraButton.addEventListener('click', capturePhoto);
         addChatMessage('用戶成功開啟了相機。');
-        
-        // 重置結果顯示
-        result.textContent = '';
-        catAccuracy.textContent = '貓: 0%';
-        dogAccuracy.textContent = '狗: 0%';
       } catch (error) {
         console.error('無法開啟相機:', error);
         addChatMessage('無法開啟相機，請確保您的設備支援並已授權使用相機。');
