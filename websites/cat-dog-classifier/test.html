@@ -13,16 +13,6 @@ h1, h2 {
   color: #4a4a4a;
   text-align: center;
 }
-#loadingProgress {
-  width: 90%;
-  max-width: 300px;
-  margin: 20px auto;
-  text-align: center;
-}
-#modelLoadingBar {
-  width: 100%;
-  height: 20px;
-}
 #dropZone {
   width: 90%;
   max-width: 300px;
@@ -156,10 +146,6 @@ h1, h2 {
 </head>
 <body>
   <h1>進階寵物辨識器 - RWD版本</h1>
-  <div id="loadingProgress" style="display: none;">
-    <p>正在載入預設模型，請稍候...</p>
-    <progress id="modelLoadingBar" value="0" max="100"></progress>
-  </div>
   <div id="dropZone">
     <p id="dropText">拖曳圖片到此處或點擊上傳</p>
     <img id="petImage" src="" alt="">
@@ -212,28 +198,18 @@ h1, h2 {
     const modelInput = document.getElementById('modelInput');
     const uploadModelButton = document.getElementById('uploadModel');
     const cameraButton = document.getElementById('cameraButton');
-    const loadingProgress = document.getElementById('loadingProgress');
-    const modelLoadingBar = document.getElementById('modelLoadingBar');
-    let currentFacingMode = 'environment'; // 默認使用後置攝像頭
+    let currentFacingMode = 'environment';
     const switchCameraButton = document.getElementById('switchCamera');
 
-    // 載入默認模型
-    loadingProgress.style.display = 'block';
-    mobilenet.load({
-      modelUrl: 'https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet@2.1.0/model.json',
-      weightUrlPrefix: 'https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet@2.1.0/weights.',
-    }).then(loadedModel => {
+    mobilenet.load().then(loadedModel => {
       model = loadedModel;
       console.log('默認模型已載入');
       addChatMessage('系統成功載入默認模型。');
-      loadingProgress.style.display = 'none';
     }).catch(error => {
       console.error('載入默認模型失敗:', error);
       addChatMessage('載入默認模型失敗，請檢查網絡連接或重新載入頁面。');
-      loadingProgress.style.display = 'none';
     });
 
-    // 拖放事件處理
     dropZone.addEventListener('dragover', (e) => {
       e.preventDefault();
       dropZone.classList.add('dragover');
@@ -250,7 +226,6 @@ h1, h2 {
       handleFile(file);
     });
 
-    // 點擊上傳
     dropZone.addEventListener('click', () => {
       fileInput.click();
     });
@@ -269,7 +244,6 @@ h1, h2 {
         video.style.display = 'none';
         dropText.style.display = 'none';
 
-        // 使用 Promise 確保圖像已完全加載
         petImage.onload = () => {
           console.log('圖像已加載，開始分類');
           classifyImage(petImage).catch(error => {
@@ -287,7 +261,6 @@ h1, h2 {
         console.log('圖像元素:', img);
         console.log('圖像尺寸:', img.width, 'x', img.height);
         
-        // 確保圖像已完全加載
         await new Promise((resolve) => {
           if (img.complete) {
             resolve();
@@ -295,22 +268,19 @@ h1, h2 {
             img.onload = resolve;
           }
         });
-        
-        // 創建一個臨時的 canvas 元素
+
         const canvas = document.createElement('canvas');
         canvas.width = 224;
         canvas.height = 224;
         const ctx = canvas.getContext('2d');
         ctx.drawImage(img, 0, 0, 224, 224);
         
-        // 從 canvas 創建 tensor
         const tensor = tf.browser.fromPixels(canvas)
           .toFloat()
           .expandDims();
-        
+
         console.log('圖像已轉換為 tensor');
         
-        // 使用當前載入的模型進行分類
         const predictions = await model.classify(tensor);
         console.log('分類結果:', predictions);
 
@@ -337,14 +307,12 @@ h1, h2 {
           result.textContent = '這不是貓或狗，請上傳寵物圖片。';
         }
 
-        // 更新準確度顯示
         catAccuracy.textContent = `貓: ${(catProb * 100).toFixed(2)}%`;
         dogAccuracy.textContent = `狗: ${(dogProb * 100).toFixed(2)}%`;
 
-        // 添加對話記錄
         addChatMessage(`用戶上傳了一張圖片，系統辨識結果：${result.textContent} 貓的可能性：${(catProb * 100).toFixed(2)}%，狗的可能性：${(dogProb * 100).toFixed(2)}%`);
 
-        tensor.dispose();  // 釋放 tensor 內存
+        tensor.dispose();
       } catch (error) {
         console.error('圖片分類失敗:', error);
         addChatMessage('圖片分類失敗，請稍後再試。錯誤信息：' + error.message);
@@ -352,7 +320,6 @@ h1, h2 {
       }
     }
 
-    // 上傳自訂模型
     uploadModelButton.addEventListener('click', async () => {
       const modelFile = modelInput.files[0];
       if (!modelFile) {
@@ -373,13 +340,15 @@ h1, h2 {
       }
     });
 
-    // 更新開啟相機函數
     async function openCamera() {
       try {
         console.log('嘗試開啟相機，當前模式：', currentFacingMode);
-        const stream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: currentFacingMode }
-        });
+        const constraints = {
+          video: {
+            facingMode: { ideal: currentFacingMode }
+          }
+        };
+        const stream = await navigator.mediaDevices.getUserMedia(constraints);
         video.srcObject = stream;
         video.style.display = 'block';
         petImage.style.display = 'none';
@@ -390,8 +359,7 @@ h1, h2 {
         cameraButton.addEventListener('click', capturePhoto);
         addChatMessage('用戶成功開啟了相機。');
         console.log('相機成功開啟');
-        
-        // 重置結果顯示
+
         result.textContent = '';
         catAccuracy.textContent = '貓: 0%';
         dogAccuracy.textContent = '狗: 0%';
@@ -402,7 +370,6 @@ h1, h2 {
       }
     }
 
-    // 修改 capturePhoto 函數
     function capturePhoto() {
       if (!video.srcObject) {
         console.error('相機未開啟');
@@ -415,40 +382,34 @@ h1, h2 {
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
       const context = canvas.getContext('2d');
-      context.drawImage(video, 0, 0);
+      context.drawImage(video, 0, 0, canvas.width, canvas.height);
       
-      canvas.toBlob((blob) => {
-        const url = URL.createObjectURL(blob);
-        petImage.src = url;
-        petImage.alt = '拍攝的寵物照片';
-        petImage.style.display = 'block';
-        video.style.display = 'none';
-        
-        // 重置結果顯示
-        result.textContent = '';
-        catAccuracy.textContent = '貓: 0%';
-        dogAccuracy.textContent = '狗: 0%';
-        
-        // 使用 Promise 確保圖像已完全加載
-        petImage.onload = () => {
-          console.log('圖像已加載，開始分類');
-          classifyImage(petImage).catch(error => {
-            console.error('圖像分類失敗:', error);
-            addChatMessage('圖像分類失敗，請稍後再試。錯誤信息：' + error.message);
-          });
-          URL.revokeObjectURL(url);  // 釋放 blob URL
-        };
-        
-        cameraButton.textContent = '開啟相機';
-        switchCameraButton.style.display = 'none';
-        cameraButton.removeEventListener('click', capturePhoto);
-        cameraButton.addEventListener('click', openCamera);
-        addChatMessage('用戶拍攝了一張照片並進行辨識。');
-        
-        const stream = video.srcObject;
-        const tracks = stream.getTracks();
-        tracks.forEach(track => track.stop());
-      }, 'image/jpeg', 0.95);  // 使用高質量 JPEG 格式
+      petImage.src = canvas.toDataURL('image/jpeg');
+      petImage.alt = '拍攝的寵物照片';
+      petImage.style.display = 'block';
+      video.style.display = 'none';
+      
+      result.textContent = '';
+      catAccuracy.textContent = '貓: 0%';
+      dogAccuracy.textContent = '狗: 0%';
+
+      petImage.onload = () => {
+        console.log('圖像已加載，開始分類');
+        classifyImage(petImage).catch(error => {
+          console.error('圖像分類失敗:', error);
+          addChatMessage('圖像分類失敗，請稍後再試。錯誤信息：' + error.message);
+        });
+      };
+      
+      cameraButton.textContent = '開啟相機';
+      switchCameraButton.style.display = 'none';
+      cameraButton.removeEventListener('click', capturePhoto);
+      cameraButton.addEventListener('click', openCamera);
+      addChatMessage('用戶拍攝了一張照片並進行辨識。');
+      
+      const stream = video.srcObject;
+      const tracks = stream.getTracks();
+      tracks.forEach(track => track.stop());
     }
 
     function addChatMessage(message) {
@@ -457,16 +418,21 @@ h1, h2 {
       chatHistory.appendChild(chatItem);
     }
 
-    // 更新相機按鈕點擊事件監聽器
     cameraButton.addEventListener('click', openCamera);
 
-    // Add a global error handler
+    switchCameraButton.addEventListener('click', () => {
+      currentFacingMode = currentFacingMode === 'user' ? 'environment' : 'user';
+      const stream = video.srcObject;
+      const tracks = stream.getTracks();
+      tracks.forEach(track => track.stop());
+      openCamera();
+    });
+
     window.addEventListener('unhandledrejection', function(event) {
       console.error('Unhandled rejection (promise: ', event.promise, ', reason: ', event.reason, ').');
       addChatMessage('發生未處理的錯誤。請刷新頁面並重試。錯誤信息：' + event.reason);
     });
 
-    // 添加全局錯誤處理
     window.addEventListener('error', function(event) {
       console.error('捕獲到錯誤:', event.error);
       addChatMessage('發生錯誤。請刷新頁面並重試。錯誤信息：' + event.error.message);
