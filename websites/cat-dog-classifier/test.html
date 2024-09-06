@@ -5,7 +5,7 @@
     <base href="https://webcreation.example.com/cat-dog-classifier/">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>貓星人與汪星人識別器</title>
+    <title>喵星人與汪星人識別器</title>
     <style>
         /* 保留原有的樣式 */
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap');
@@ -125,7 +125,8 @@
             font-weight: bold;
             color: var(--accent-color);
         }
-
+        
+        #imageFrame img,
         #imageFrame {
             width: 100%;
             height: 300px;
@@ -139,14 +140,19 @@
             position: relative;
             background-color: var(--secondary-color);
             transition: all 0.3s ease;
+            position: relative;
+        }
+
+        #imageFrame.drag-over {
+            border-color: var(--accent-color);
+            background-color: rgba(52, 152, 219, 0.1);
         }
 
         #imageFrame:hover {
             border-color: var(--accent-color);
         }
 
-        #imageFrame img,
-        #imageFrame video {
+        #imageFrame {
             max-width: 100%;
             max-height: 100%;
             object-fit: contain;
@@ -166,6 +172,7 @@
             font-size: 1.5em;
             color: white;
             border-radius: 12px;
+            z-index: 10;
         }
 
         #result {
@@ -327,7 +334,11 @@
             }
         }
 
-        // 初始化
+        貓星人與汪星人識別器網頁
+        Preview
+        Code
+
+        // 更新初始化部分
         window.onload = () => {
             loadModel();
             document.getElementById('cameraButton').addEventListener('click', startCamera);
@@ -423,7 +434,9 @@
         }
 
         // 處理拖放圖片
+        // 更新的 handleDrop 函數
         function handleDrop(e) {
+            e.preventDefault(); // 確保阻止默認行為
             const dt = e.dataTransfer;
             const file = dt.files[0];
 
@@ -437,7 +450,6 @@
                 updateChat("請拖放有效的圖片文件。");
             }
         }
-
         // 處理圖像數據
         function processImageData(imageData) {
             const img = new Image();
