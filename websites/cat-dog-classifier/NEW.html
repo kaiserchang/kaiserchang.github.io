@@ -319,7 +319,7 @@ h1, h2 {
       }
     });
 
-    // 開啟相機
+    // 更新開啟相機函數
     async function openCamera() {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({
@@ -333,16 +333,23 @@ h1, h2 {
         switchCameraButton.style.display = 'inline-block';
         cameraButton.removeEventListener('click', openCamera);
         cameraButton.addEventListener('click', capturePhoto);
-        addChatMessage('用戶開啟了相機。');
+        addChatMessage('用戶成功開啟了相機。');
       } catch (error) {
         console.error('無法開啟相機:', error);
         addChatMessage('無法開啟相機，請確保您的設備支援並已授權使用相機。');
-        alert('無法開啟相機，請確保您的設備支援並已授權使用相機。');
+        alert('無法開啟相機，請確保您的設備支援並已授權使用相機。錯誤信息：' + error.message);
       }
     }
 
-    // 拍照並辨識
+    // 更新拍照函數
     function capturePhoto() {
+      if (!video.srcObject) {
+        console.error('相機未開啟');
+        addChatMessage('無法拍照，相機未開啟。');
+        alert('無法拍照，相機未開啟。請先開啟相機。');
+        return;
+      }
+      
       const canvas = document.createElement('canvas');
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
@@ -352,7 +359,6 @@ h1, h2 {
       petImage.style.display = 'block';
       video.style.display = 'none';
       
-      // 使用 Promise 來確保圖片加載完成後再進行分類
       petImage.onload = () => {
         classifyImage(petImage);
       };
@@ -363,7 +369,6 @@ h1, h2 {
       cameraButton.addEventListener('click', openCamera);
       addChatMessage('用戶拍攝了一張照片並進行辨識。');
       
-      // 停止相機流
       const stream = video.srcObject;
       const tracks = stream.getTracks();
       tracks.forEach(track => track.stop());
@@ -374,5 +379,8 @@ h1, h2 {
       chatItem.textContent = message;
       chatHistory.appendChild(chatItem);
     }
+
+    // 更新相機按鈕點擊事件監聽器
+    cameraButton.addEventListener('click', openCamera);
   </script>
 </body></html>
