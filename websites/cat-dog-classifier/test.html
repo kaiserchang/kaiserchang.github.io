@@ -210,11 +210,11 @@ h1, h2 {
 
     mobilenet.load().then(loadedModel => {
       model = loadedModel;
-      console.log('默認模型已載入');
-      addChatMessage('系統成功載入默認模型。');
+      console.log('MobileNet模型已載入');
+      addChatMessage('系統成功載入MobileNet模型。');
     }).catch(error => {
-      console.error('載入默認模型失敗:', error);
-      addChatMessage('載入默認模型失敗，請檢查網絡連接或重新載入頁面。');
+      console.error('載入MobileNet模型失敗:', error);
+      addChatMessage('載入MobileNet模型失敗，請檢查網絡連接或重新載入頁面。');
     });
 
     dropZone.addEventListener('dragover', (e) => {
@@ -252,7 +252,7 @@ h1, h2 {
         dropText.style.display = 'none';
 
         petImage.onload = () => {
-          console.log('圖像已加載，開始分類');
+          console.log('圖像已加載，開始使用MobileNet分類');
           classifyImage(petImage).catch(error => {
             console.error('圖像分類失敗:', error);
             addChatMessage('圖像分類失敗，請稍後再試。錯誤信息：' + error.message);
@@ -264,10 +264,8 @@ h1, h2 {
 
     async function classifyImage(img) {
       try {
-        console.log('開始分類圖像');
-        console.log('圖像元素:', img);
-        console.log('圖像尺寸:', img.width, 'x', img.height);
-        
+        console.log('開始使用MobileNet分類圖像');
+
         await new Promise((resolve) => {
           if (img.complete) {
             resolve();
@@ -276,23 +274,8 @@ h1, h2 {
           }
         });
 
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
-        
-        canvas.width = 224;
-        canvas.height = 224;
-        
-        ctx.drawImage(img, 0, 0, 224, 224);
-        
-        const tensor = tf.browser.fromPixels(canvas)
-          .toFloat()
-          .div(tf.scalar(255))
-          .expandDims();
-
-        console.log('圖像已轉換為 tensor，形狀:', tensor.shape);
-        
-        const predictions = await model.classify(tensor);
-        console.log('分類結果:', predictions);
+        const predictions = await model.classify(img);
+        console.log('MobileNet分類結果:', predictions);
 
         let isPet = false;
         let petType = '';
@@ -322,7 +305,6 @@ h1, h2 {
 
         addChatMessage(`用戶上傳了一張圖片，系統辨識結果：${result.textContent} 貓的可能性：${(catProb * 100).toFixed(2)}%，狗的可能性：${(dogProb * 100).toFixed(2)}%`);
 
-        tensor.dispose();
       } catch (error) {
         console.error('圖片分類失敗:', error);
         addChatMessage('圖片分類失敗，請稍後再試。錯誤信息：' + error.message);
@@ -401,7 +383,7 @@ h1, h2 {
       dogAccuracy.textContent = '狗: 0%';
 
       petImage.onload = () => {
-        console.log('圖像已加載，開始分類');
+        console.log('圖像已加載，開始使用MobileNet分類');
         classifyImage(petImage).catch(error => {
           console.error('圖像分類失敗:', error);
           addChatMessage('圖像分類失敗，請稍後再試。錯誤信息：' + error.message);
@@ -477,7 +459,7 @@ h1, h2 {
       dogAccuracy.textContent = '狗: 0%';
 
       petImage.onload = () => {
-        console.log('圖像已加載，開始分類');
+        console.log('圖像已加載，開始使用MobileNet分類');
         classifyImage(petImage).catch(error => {
           console.error('圖像分類失敗:', error);
           addChatMessage('圖像分類失敗，請稍後再試。錯誤信息：' + error.message);
