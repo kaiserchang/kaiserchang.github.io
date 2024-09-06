@@ -260,6 +260,9 @@ h1, h2 {
     async function classifyImage(img) {
       try {
         console.log('開始分類圖像');
+        console.log('圖像元素:', img);
+        console.log('圖像尺寸:', img.width, 'x', img.height);
+        
         const predictions = await model.classify(img);
         console.log('分類結果:', predictions);
 
@@ -294,7 +297,7 @@ h1, h2 {
         addChatMessage(`用戶上傳了一張圖片，系統辨識結果：${result.textContent} 貓的可能性：${(catProb * 100).toFixed(2)}%，狗的可能性：${(dogProb * 100).toFixed(2)}%`);
       } catch (error) {
         console.error('圖片分類失敗:', error);
-        addChatMessage('圖片分類失敗，請稍後再試。');
+        addChatMessage('圖片分類失敗，請稍後再試。錯誤信息：' + error.message);
         result.textContent = '圖片分類失敗，請稍後再試。';
       }
     }
@@ -323,6 +326,7 @@ h1, h2 {
     // 更新開啟相機函數
     async function openCamera() {
       try {
+        console.log('嘗試開啟相機，當前模式：', currentFacingMode);
         const stream = await navigator.mediaDevices.getUserMedia({
           video: { facingMode: currentFacingMode }
         });
@@ -335,6 +339,7 @@ h1, h2 {
         cameraButton.removeEventListener('click', openCamera);
         cameraButton.addEventListener('click', capturePhoto);
         addChatMessage('用戶成功開啟了相機。');
+        console.log('相機成功開啟');
         
         // 重置結果顯示
         result.textContent = '';
@@ -342,7 +347,7 @@ h1, h2 {
         dogAccuracy.textContent = '狗: 0%';
       } catch (error) {
         console.error('無法開啟相機:', error);
-        addChatMessage('無法開啟相機，請確保您的設備支援並已授權使用相機。');
+        addChatMessage('無法開啟相機，請確保您的設備支援並已授權使用相機。錯誤信息：' + error.message);
         alert('無法開啟相機，請確保您的設備支援並已授權使用相機。錯誤信息：' + error.message);
       }
     }
@@ -365,6 +370,12 @@ h1, h2 {
       petImage.style.display = 'block';
       video.style.display = 'none';
       
+      // 重置結果顯示
+      result.textContent = '';
+      catAccuracy.textContent = '貓: 0%';
+      dogAccuracy.textContent = '狗: 0%';
+      
+      // 使用 Promise 確保圖像已完全加載
       petImage.onload = () => {
         classifyImage(petImage);
       };
@@ -388,5 +399,11 @@ h1, h2 {
 
     // 更新相機按鈕點擊事件監聽器
     cameraButton.addEventListener('click', openCamera);
+
+    // Add a global error handler
+    window.addEventListener('unhandledrejection', function(event) {
+      console.error('Unhandled rejection (promise: ', event.promise, ', reason: ', event.reason, ').');
+      addChatMessage('發生未處理的錯誤。請刷新頁面並重試。錯誤信息：' + event.reason);
+    });
   </script>
 </body></html>
