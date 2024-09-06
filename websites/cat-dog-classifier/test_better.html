@@ -277,19 +277,16 @@ h1, h2 {
         });
 
         const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
-        
         canvas.width = 224;
         canvas.height = 224;
-        
+        const ctx = canvas.getContext('2d');
         ctx.drawImage(img, 0, 0, 224, 224);
         
         const tensor = tf.browser.fromPixels(canvas)
           .toFloat()
-          .div(tf.scalar(255))
           .expandDims();
 
-        console.log('圖像已轉換為 tensor，形狀:', tensor.shape);
+        console.log('圖像已轉換為 tensor');
         
         const predictions = await model.classify(tensor);
         console.log('分類結果:', predictions);
@@ -459,15 +456,9 @@ h1, h2 {
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
       const context = canvas.getContext('2d');
-      
-      if (window.innerWidth > window.innerHeight) {
-        context.translate(canvas.width, 0);
-        context.scale(-1, 1);
-      }
-      
       context.drawImage(video, 0, 0, canvas.width, canvas.height);
       
-      petImage.src = canvas.toDataURL('image/jpeg', 0.8);
+      petImage.src = canvas.toDataURL('image/jpeg');
       petImage.alt = '拍攝的寵物照片';
       petImage.style.display = 'block';
       video.style.display = 'none';
