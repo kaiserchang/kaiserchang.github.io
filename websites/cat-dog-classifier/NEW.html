@@ -191,7 +191,7 @@ h1, h2 {
     const uploadModelButton = document.getElementById('uploadModel');
     const cameraButton = document.getElementById('cameraButton');
     const video = document.getElementById('video');
-    let currentFacingMode = 'user'; // 默認使用前置攝像頭
+    let currentFacingMode = 'environment'; // 默認使用後置攝像頭
     const switchCameraButton = document.getElementById('switchCamera');
 
     // 載入默認模型
@@ -352,7 +352,12 @@ h1, h2 {
       petImage.alt = '拍攝的寵物照片';
       dropZone.innerHTML = '';
       dropZone.appendChild(petImage);
-      classifyImage(petImage);
+      
+      // 使用 Promise 來確保圖片加載完成後再進行分類
+      petImage.onload = () => {
+        classifyImage(petImage);
+      };
+      
       video.style.display = 'none';
       cameraButton.textContent = '開啟相機';
       switchCameraButton.style.display = 'none';
