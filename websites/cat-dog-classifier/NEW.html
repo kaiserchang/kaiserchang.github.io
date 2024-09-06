@@ -25,6 +25,8 @@ h1, h2 {
   margin: 20px 0;
   cursor: pointer;
   transition: background-color 0.3s;
+  position: relative;
+  overflow: hidden;
 }
 #dropZone:hover {
   background-color: #e6f2ff;
@@ -33,10 +35,20 @@ h1, h2 {
   background-color: #d4e6f1;
   border-color: #3498db;
 }
-#petImage {
-  max-width: 100%;
-  max-height: 100%;
-  border-radius: 10px;
+#petImage, #video {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+#dropText {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1;
 }
 #result {
   font-size: 20px;
@@ -112,12 +124,6 @@ h1, h2 {
   cursor: pointer;
   border-radius: 5px;
 }
-#video {
-  display: none;
-  width: 100%;
-  max-width: 300px;
-  margin-top: 20px;
-}
 @media (max-width: 600px) {
   body {
     padding: 10px;
@@ -141,13 +147,13 @@ h1, h2 {
 <body>
   <h1>進階寵物辨識器 - RWD版本</h1>
   <div id="dropZone">
-    <p>拖曳圖片到此處或點擊上傳</p>
+    <p id="dropText">拖曳圖片到此處或點擊上傳</p>
     <img id="petImage" src="" alt="">
+    <video id="video" autoplay playsinline></video>
   </div>
   <input type="file" id="fileInput" style="display: none;" accept="image/*">
   <button id="cameraButton">開啟相機</button>
   <button id="switchCamera" style="display: none;">切換相機</button>
-  <video id="video" autoplay playsinline></video>
   <div id="result"></div>
 
   <div id="predictionImages">
@@ -184,13 +190,14 @@ h1, h2 {
     const fileInput = document.getElementById('fileInput');
     const result = document.getElementById('result');
     const petImage = document.getElementById('petImage');
+    const video = document.getElementById('video');
+    const dropText = document.getElementById('dropText');
     const chatHistory = document.getElementById('chatHistory');
     const catAccuracy = document.getElementById('catAccuracy');
     const dogAccuracy = document.getElementById('dogAccuracy');
     const modelInput = document.getElementById('modelInput');
     const uploadModelButton = document.getElementById('uploadModel');
     const cameraButton = document.getElementById('cameraButton');
-    const video = document.getElementById('video');
     let currentFacingMode = 'environment'; // 默認使用後置攝像頭
     const switchCameraButton = document.getElementById('switchCamera');
 
@@ -234,12 +241,14 @@ h1, h2 {
     function handleFile(file) {
       const reader = new FileReader();
       reader.onload = (event) => {
+        petImage.src = event.target.result;
+        petImage.alt = '上傳的寵物圖片';
+        petImage.style.display = 'block';
+        video.style.display = 'none';
+        dropText.style.display = 'none';
+
         const img = new Image();
         img.onload = () => {
-          petImage.src = event.target.result;
-          petImage.alt = '上傳的寵物圖片';
-          dropZone.innerHTML = '';
-          dropZone.appendChild(petImage);
           classifyImage(img);
         }
         img.src = event.target.result;
@@ -318,6 +327,8 @@ h1, h2 {
         });
         video.srcObject = stream;
         video.style.display = 'block';
+        petImage.style.display = 'none';
+        dropText.style.display = 'none';
         cameraButton.textContent = '拍照';
         switchCameraButton.style.display = 'inline-block';
         cameraButton.removeEventListener('click', openCamera);
@@ -330,18 +341,6 @@ h1, h2 {
       }
     }
 
-    // 切換相機
-    async function switchCamera() {
-      currentFacingMode = currentFacingMode === 'user' ? 'environment' : 'user';
-      const stream = video.srcObject;
-      stream.getTracks().forEach(track => track.stop());
-      await openCamera();
-      addChatMessage('用戶切換了相機。');
-    }
-
-    cameraButton.addEventListener('click', openCamera);
-    switchCameraButton.addEventListener('click', switchCamera);
-
     // 拍照並辨識
     function capturePhoto() {
       const canvas = document.createElement('canvas');
@@ -350,20 +349,24 @@ h1, h2 {
       canvas.getContext('2d').drawImage(video, 0, 0);
       petImage.src = canvas.toDataURL('image/jpeg');
       petImage.alt = '拍攝的寵物照片';
-      dropZone.innerHTML = '';
-      dropZone.appendChild(petImage);
+      petImage.style.display = 'block';
+      video.style.display = 'none';
       
       // 使用 Promise 來確保圖片加載完成後再進行分類
       petImage.onload = () => {
         classifyImage(petImage);
       };
       
-      video.style.display = 'none';
       cameraButton.textContent = '開啟相機';
       switchCameraButton.style.display = 'none';
       cameraButton.removeEventListener('click', capturePhoto);
       cameraButton.addEventListener('click', openCamera);
       addChatMessage('用戶拍攝了一張照片並進行辨識。');
+      
+      // 停止相機流
+      const stream = video.srcObject;
+      const tracks = stream.getTracks();
+      tracks.forEach(track => track.stop());
     }
 
     function addChatMessage(message) {
