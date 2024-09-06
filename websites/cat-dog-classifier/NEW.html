@@ -247,24 +247,43 @@ h1, h2 {
         video.style.display = 'none';
         dropText.style.display = 'none';
 
-        const img = new Image();
-        img.onload = () => {
-          classifyImage(img);
-        }
-        img.src = event.target.result;
+        // 使用 Promise 確保圖像已完全加載
+        petImage.onload = () => {
+          console.log('圖像已加載，開始分類');
+          classifyImage(petImage).catch(error => {
+            console.error('圖像分類失敗:', error);
+            addChatMessage('圖像分類失敗，請稍後再試。錯誤信息：' + error.message);
+          });
+        };
       }
       reader.readAsDataURL(file);
     }
 
-    // 分類圖片
+    // 修改 classifyImage 函數
     async function classifyImage(img) {
       try {
         console.log('開始分類圖像');
         console.log('圖像元素:', img);
         console.log('圖像尺寸:', img.width, 'x', img.height);
         
-        const tensor = tf.browser.fromPixels(img)
-          .resizeNearestNeighbor([224, 224])
+        // 確保圖像已完全加載
+        await new Promise((resolve) => {
+          if (img.complete) {
+            resolve();
+          } else {
+            img.onload = resolve;
+          }
+        });
+        
+        // 創建一個臨時的 canvas 元素
+        const canvas = document.createElement('canvas');
+        canvas.width = 224;
+        canvas.height = 224;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, 224, 224);
+        
+        // 從 canvas 創建 tensor
+        const tensor = tf.browser.fromPixels(canvas)
           .toFloat()
           .expandDims();
         
@@ -361,7 +380,7 @@ h1, h2 {
       }
     }
 
-    // 更新拍照函數
+    // 修改 capturePhoto 函數
     function capturePhoto() {
       if (!video.srcObject) {
         console.error('相機未開啟');
@@ -376,7 +395,6 @@ h1, h2 {
       const context = canvas.getContext('2d');
       context.drawImage(video, 0, 0);
       
-      // 使用 toBlob 替代 toDataURL，以確保圖像格式一致
       canvas.toBlob((blob) => {
         const url = URL.createObjectURL(blob);
         petImage.src = url;
