@@ -1,0 +1,570 @@
+<html><head><base href="https://pengim-ai.com/websim/chatbot/"><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>進階寵物辨識器 - RWD版本</title>
+<style>
+body {
+  font-family: 'Microsoft JhengHei', Arial, sans-serif;
+  background-color: #000000;
+  color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  margin: 0;
+}
+h1, h2 {
+  color: #ffffff;
+  text-align: center;
+}
+#dropZone {
+  width: 90%;
+  max-width: 300px;
+  height: 300px;
+  border: 2px dashed #4a90e2;
+  border-radius: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 20px 0;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  position: relative;
+  overflow: hidden;
+  background-color: rgba(74, 144, 226, 0.1);
+}
+#dropZone:hover {
+  background-color: rgba(74, 144, 226, 0.2);
+}
+#dropZone.dragover {
+  background-color: rgba(74, 144, 226, 0.3);
+  border-color: #4a90e2;
+}
+#petImage, #video {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+#dropText {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1;
+}
+#result {
+  color: #4a90e2;
+  font-size: 20px;
+  font-weight: bold;
+  margin: 20px 0;
+  text-align: center;
+}
+#predictionImages {
+  display: flex;
+  justify-content: space-around;
+  width: 100%;
+  max-width: 600px;
+  margin-top: 20px;
+  background-color: rgba(255, 255, 255, 0.1);
+}
+.predictionBox {
+  text-align: center;
+}
+.predictionBox img {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 50%;
+}
+.accuracy {
+  margin-top: 10px;
+  color: #4a90e2;
+  font-weight: bold;
+}
+#chatLog {
+  width: 90%;
+  margin-top: 40px;
+  padding: 20px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  color: #ffffff;
+}
+#modelUpload {
+  margin-top: 20px;
+  padding: 20px;
+  background-color: rgba(74, 144, 226, 0.1);
+  border-radius: 10px;
+  text-align: center;
+  width: 90%;
+  max-width: 600px;
+  color: #ffffff;
+}
+#modelInfo {
+  color: #4a90e2;
+  margin-top: 10px;
+  font-style: italic;
+}
+#cameraButton {
+  background-color: #4a90e2;
+  border: none;
+  color: white;
+  padding: 15px 32px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 4px 2px;
+  cursor: pointer;
+  border-radius: 5px;
+}
+#mobileCameraButton {
+  background-color: #4a90e2;
+  border: none;
+  color: white;
+  padding: 15px 32px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 4px 2px;
+  cursor: pointer;
+  border-radius: 5px;
+}
+#cameraButton:hover, #mobileCameraButton:hover {
+  background-color: #3a7bc2;
+}
+@media (max-width: 600px) {
+  body {
+    padding: 10px;
+  }
+  h1 {
+    font-size: 28px;
+  }
+  #dropZone {
+    height: 200px;
+  }
+  #result {
+    font-size: 18px;
+  }
+  .predictionBox img {
+    width: 60px;
+    height: 60px;
+  }
+  #cameraButton {
+    display: none;
+  }
+}
+@media (min-width: 601px) {
+  #mobileCameraButton {
+    display: none;
+  }
+}
+</style>
+</head>
+<body>
+  <h1>喵星人與汪星人識別器</h1>
+  <div id="dropZone">
+    <p id="dropText">拖曳圖片到此處或點擊上傳</p>
+    <img id="petImage" src="" alt="">
+    <video id="video" autoplay playsinline></video>
+  </div>
+  <input type="file" id="fileInput" style="display: none;" accept="image/*">
+  <button id="cameraButton">開啟WebCam</button>
+  <button id="mobileCameraButton">開啟手機相機</button>
+  <div id="result"></div>
+
+  <div id="predictionImages">
+    <div class="predictionBox">
+      <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIiB2aWV3Qm94PSIwIDAgMjAwIDIwMCI+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0iI2VlZSIvPjxwYXRoIGQ9Ik0xMDAgNjBjLTIyLjEgMC00MCAxNy45LTQwIDQ0MHMxNy45IDQwIDQwIDQwIDQ0MC0xNy45IDQwLTQwLTQwLTQwem0yMCAzMGMtNS41IDAtMTAgNC41LTEwIDEwczQuNSAxMCAxMCAxMCAxMC00LjUgMTAtMTAtNC41LTEwLTEwLTEuem0tNDAgMGMtNS41IDAtMTAgNC41LTEwIDEwczQuNSAxMCAxMCAxMCAxMC00LjUgMTAtMTAtNC41LTEwLTEwLTEweiIgZmlsbD0iIzMzMyIvPjxwYXRoIGQ9Ik0xMDAgMTQwYzExIDAgMjAtOSAyMC0yMHMtOS0yMC0yMC0yMC0yMCA5LTIwIDIwIDkgMjAgMjAgMjB6IiBmaWxsPSIjMzMzIi8+PC9zdmc+" alt="貓咪圖示">
+      <div class="accuracy" id="catAccuracy">貓: 0%</div>
+    </div>
+    <div class="predictionBox">
+      <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIiB2aWV3Qm94PSIwIDAgMjAwIDIwMCI+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0iI2VlZSIvPjxwYXRoIGQ9Ik0xMDAgNjBjLTIyLjEgMC00MCAxNy45LTQwIDQwczE3LjkgNDAgNDAgNDAgNDAtMTcuOSA0MC00MC0xNy45LTQwLTQwLTQwem0yMCAzMGMtNS41IDAtMTAgNC41LTEwIDEwczQuNSAxMCAxMCAxMCAxMC00LjUgMTAtMTAtNC41LTEwLTEwLTEuem0tNDAgMGMtNS41IDAtMTAgNC41LTEwIDEwczQuNSAxMCAxMCAxMCAxMC00LjUgMTAtMTAtNC41LTEwLTEwLTEweiIgZmlsbD0iIzMzMyIvPjxwYXRoIGQ9Ik0xMDAgMTQwYzExIDAgMjAtOSAyMC0yMHMtOS0yMC0yMC0yMC0yMCA5LTIwIDIwIDkgMjAgMjAgMjB6IiBmaWxsPSIjMzMzIi8+PC9zdmc+" alt="狗狗圖示">
+      <div class="accuracy" id="dogAccuracy">狗: 0%</div>
+    </div>
+  </div>
+
+  <div id="modelUpload">
+    <h2>上傳自訂模型</h2>
+    <input type="file" id="modelInput" accept=".json">
+    <button id="uploadModel">上傳模型</button>
+    <div id="modelInfo">
+      支援的模型格式：TensorFlow.js JSON模型（包含model.json和權重文件）<br>
+      目前使用的模型：MobileNet V2<br>
+      請確保您的模型與目前的輸入/輸出格式相容
+    </div>
+  </div>
+
+  <div id="chatLog">
+    <h2>對話記錄</h2>
+    <ul id="chatHistory"></ul>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.11.0/dist/tf.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-converter@3.11.0/dist/tf-converter.min.js"></script>
+  <script>
+    let model;
+    const MODEL_URL = 'https://tfhub.dev/google/tfjs-model/imagenet/mobilenet_v2_100_224/classification/3/default/1';
+
+    async function loadModel() {
+      const maxRetries = 3;
+      let retries = 0;
+      while (retries < maxRetries) {
+        try {
+          model = await tf.loadGraphModel(MODEL_URL, {fromTFHub: true});
+          console.log('MobileNet 模型已載入');
+          addChatMessage('系統成功載入 MobileNet 模型。');
+          document.getElementById('modelInfo').textContent = '目前使用的模型：MobileNet V2';
+          return;
+        } catch (error) {
+          retries++;
+          console.error(`載入 MobileNet 模型失敗 (嘗試 ${retries}/${maxRetries}):`, error);
+          if (retries === maxRetries) {
+            addChatMessage(`載入 MobileNet 模型失敗，請檢查網絡連接或重新載入頁面。錯誤信息：${error.message}`);
+            alert(`載入模型失敗，請稍後再試。錯誤信息：${error.message}`);
+          } else {
+            await new Promise(resolve => setTimeout(resolve, 2000));
+          }
+        }
+      }
+    }
+
+    loadModel();
+
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('fileInput');
+    const result = document.getElementById('result');
+    const petImage = document.getElementById('petImage');
+    const video = document.getElementById('video');
+    const dropText = document.getElementById('dropText');
+    const chatHistory = document.getElementById('chatHistory');
+    const catAccuracy = document.getElementById('catAccuracy');
+    const dogAccuracy = document.getElementById('dogAccuracy');
+    const modelInput = document.getElementById('modelInput');
+    const uploadModelButton = document.getElementById('uploadModel');
+    const cameraButton = document.getElementById('cameraButton');
+    const mobileCameraButton = document.getElementById('mobileCameraButton');
+
+    dropZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropZone.classList.add('dragover');
+    });
+
+    dropZone.addEventListener('dragleave', () => {
+      dropZone.classList.remove('dragover');
+    });
+
+    dropZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropZone.classList.remove('dragover');
+      const file = e.dataTransfer.files[0];
+      handleFile(file);
+    });
+
+    dropZone.addEventListener('click', () => {
+      fileInput.click();
+    });
+
+    fileInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      handleFile(file);
+    });
+
+    function handleFile(file) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        petImage.src = event.target.result;
+        petImage.alt = '上傳的寵物圖片';
+        petImage.style.display = 'block';
+        video.style.display = 'none';
+        dropText.style.display = 'none';
+
+        petImage.onload = () => {
+          console.log('圖像已加載，開始使用 MobileNet 分類');
+          classifyImage(petImage).catch(error => {
+            console.error('圖像分類失敗:', error);
+            addChatMessage('圖像分類失敗，請稍後再試。錯誤信息：' + error.message);
+          });
+        };
+      }
+      reader.readAsDataURL(file);
+    }
+
+    async function classifyImage(img, isMobile = false) {
+      try {
+        console.log('開始使用 MobileNet 分類圖像');
+
+        await new Promise((resolve) => {
+          if (img.complete) {
+            resolve();
+          } else {
+            img.onload = resolve;
+          }
+        });
+
+        let imgTensor;
+        if (isMobile) {
+          imgTensor = tf.tidy(() => {
+            const tensor = tf.browser.fromPixels(img);
+            const shorterSide = Math.min(tensor.shape[0], tensor.shape[1]);
+            const startingHeight = (tensor.shape[0] - shorterSide) / 2;
+            const startingWidth = (tensor.shape[1] - shorterSide) / 2;
+            const croppedTensor = tensor.slice([startingHeight, startingWidth, 0], [shorterSide, shorterSide, 3]);
+            return croppedTensor.resizeBilinear([224, 224]).toFloat().expandDims();
+          });
+        } else {
+          imgTensor = tf.tidy(() => {
+            return tf.browser.fromPixels(img)
+              .resizeBilinear([224, 224])
+              .toFloat()
+              .expandDims();
+          });
+        }
+
+        const normalized = imgTensor.div(127.5).sub(1);
+        const predictions = await model.predict(normalized).data();
+        
+        const labels = await fetch('https://storage.googleapis.com/download.tensorflow.org/data/ImageNetLabels.txt')
+          .then(response => response.text())
+          .then(text => text.split('\n'));
+
+        const top5 = Array.from(predictions)
+          .map((p, i) => ({probability: p, className: labels[i]}))
+          .sort((a, b) => b.probability - a.probability)
+          .slice(0, 5);
+
+        console.log('MobileNet 分類結果:', top5);
+
+        let isPet = false;
+        let petType = '';
+        let catProb = 0;
+        let dogProb = 0;
+
+        for (let prediction of top5) {
+          if (prediction.className.toLowerCase().includes('cat')) {
+            catProb = Math.max(catProb, prediction.probability);
+          } else if (prediction.className.toLowerCase().includes('dog')) {
+            dogProb = Math.max(dogProb, prediction.probability);
+          }
+        }
+
+        if (catProb > dogProb) {
+          isPet = true;
+          petType = '貓';
+        } else if (dogProb > catProb) {
+          isPet = true;
+          petType = '狗';
+        }
+
+        if (isPet) {
+          result.textContent = `這是一隻${petType}！`;
+        } else {
+          result.textContent = '這不是貓或狗，請上傳寵物圖片。';
+        }
+
+        catAccuracy.textContent = `貓: ${(catProb * 10).toFixed(2)}%`;
+        dogAccuracy.textContent = `狗: ${(dogProb * 10).toFixed(2)}%`;
+
+        addChatMessage(`用戶${isMobile ? '使用手機' : ''}上傳了一張圖片，系統辨識結果：${result.textContent} 貓的可能性：${(catProb * 100).toFixed(2)}%，狗的可能性：${(dogProb * 100).toFixed(2)}%`);
+
+        tf.dispose([imgTensor, normalized]);
+      } catch (error) {
+        console.error('圖片分類失敗:', error);
+        addChatMessage(`圖片分類失敗，請稍後再試。錯誤信息：${error.message}`);
+        result.textContent = `圖片分類失敗，請稍後再試。錯誤代碼：${error.status || '未知'}`;
+        
+        if (error.status === 500) {
+          addChatMessage('服務器暫時無響應，系統將在5秒後自動重試。');
+          setTimeout(() => classifyImage(img, isMobile), 5000);
+        }
+      }
+    }
+
+    uploadModelButton.addEventListener('click', async () => {
+      const modelFile = modelInput.files[0];
+      if (!modelFile) {
+        alert('請先選擇模型文件');
+        return;
+      }
+
+      try {
+        const uploadedModel = await tf.loadLayersModel(tf.io.browserFiles([modelFile]));
+        model = uploadedModel;
+        console.log('自訂模型已載入');
+        addChatMessage('用戶成功上傳並載入自訂模型。');
+        alert('自訂模型上傳成功！');
+      } catch (error) {
+        console.error('模型載入失敗:', error);
+        addChatMessage('模型上傳失敗，請確保文件格式正確。');
+        alert('模型上傳失敗，請確保文件格式正確。');
+      }
+    });
+
+    async function openCamera() {
+      try {
+        console.log('嘗試開啟WebCam');
+        const constraints = {
+          video: true
+        };
+        const stream = await navigator.mediaDevices.getUserMedia(constraints);
+        video.srcObject = stream;
+        video.style.display = 'block';
+        petImage.style.display = 'none';
+        dropText.style.display = 'none';
+        cameraButton.textContent = '拍照';
+        cameraButton.removeEventListener('click', openCamera);
+        cameraButton.addEventListener('click', capturePhoto);
+        addChatMessage('用戶成功開啟了WebCam。');
+        console.log('WebCam成功開啟');
+
+        result.textContent = '';
+        catAccuracy.textContent = '貓: 0%';
+        dogAccuracy.textContent = '狗: 0%';
+      } catch (error) {
+        console.error('無法開啟WebCam:', error);
+        addChatMessage('無法開啟WebCam，請確保您的設備支援並已授權使用WebCam。錯誤信息：' + error.message);
+        alert('無法開啟WebCam，請確保您的設備支援並已授權使用WebCam。錯誤信息：' + error.message);
+      }
+    }
+
+    function capturePhoto() {
+      if (!video.srcObject) {
+        console.error('WebCam未開啟');
+        addChatMessage('無法拍照，WebCam未開啟。');
+        alert('無法拍照，WebCam未開啟。請先開啟WebCam。');
+        return;
+      }
+      
+      const canvas = document.createElement('canvas');
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      const context = canvas.getContext('2d');
+      context.drawImage(video, 0, 0, canvas.width, canvas.height);
+      
+      petImage.src = canvas.toDataURL('image/jpeg');
+      petImage.alt = '拍攝的寵物照片';
+      petImage.style.display = 'block';
+      video.style.display = 'none';
+      
+      result.textContent = '';
+      catAccuracy.textContent = '貓: 0%';
+      dogAccuracy.textContent = '狗: 0%';
+
+      petImage.onload = () => {
+        console.log('圖像已加載，開始使用 MobileNet 分類');
+        classifyImage(petImage).catch(error => {
+          console.error('圖像分類失敗:', error);
+          addChatMessage('圖像分類失敗，請稍後再試。錯誤信息：' + error.message);
+        });
+      };
+      
+      cameraButton.textContent = '開啟WebCam';
+      cameraButton.removeEventListener('click', capturePhoto);
+      cameraButton.addEventListener('click', openCamera);
+      addChatMessage('用戶使用WebCam拍攝了一張照片並進行辨識。');
+      
+      const stream = video.srcObject;
+      const tracks = stream.getTracks();
+      tracks.forEach(track => track.stop());
+    }
+
+    async function openMobileCamera() {
+      try {
+        console.log('嘗試開啟手機相機');
+        const constraints = {
+          video: {
+            facingMode: 'environment'
+          }
+        };
+        const stream = await navigator.mediaDevices.getUserMedia(constraints);
+        video.srcObject = stream;
+        video.style.display = 'block';
+        petImage.style.display = 'none';
+        dropText.style.display = 'none';
+        mobileCameraButton.textContent = '拍照';
+        mobileCameraButton.removeEventListener('click', openMobileCamera);
+        mobileCameraButton.addEventListener('click', captureMobilePhoto);
+        addChatMessage('用戶成功開啟了手機相機。');
+        console.log('手機相機成功開啟');
+
+        result.textContent = '';
+        catAccuracy.textContent = '貓: 0%';
+        dogAccuracy.textContent = '狗: 0%';
+      } catch (error) {
+        console.error('無法開啟手機相機:', error);
+        addChatMessage('無法開啟手機相機，請確保您的設備支援並已授權使用相機。錯誤信息：' + error.message);
+        alert('無法開啟手機相機，請確保您的設備支援並已授權使用相機。錯誤信息：' + error.message);
+      }
+    }
+
+    function captureMobilePhoto() {
+      if (!video.srcObject) {
+        console.error('手機相機未開啟');
+        addChatMessage('無法拍照，手機相機未開啟。');
+        alert('無法拍照，手機相機未開啟。請先開啟手機相機。');
+        return;
+      }
+      
+      const canvas = document.createElement('canvas');
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      const context = canvas.getContext('2d');
+      
+      if (window.innerWidth > window.innerHeight) {
+        context.translate(canvas.width, 0);
+        context.scale(-1, 1);
+      }
+      
+      context.drawImage(video, 0, 0, canvas.width, canvas.height);
+      
+      petImage.src = canvas.toDataURL('image/jpeg', 0.8);
+      petImage.alt = '拍攝的寵物照片';
+      petImage.style.display = 'block';
+      video.style.display = 'none';
+      
+      result.textContent = '';
+      catAccuracy.textContent = '貓: 0%';
+      dogAccuracy.textContent = '狗: 0%';
+
+      petImage.onload = () => {
+        console.log('圖像已加載，開始使用 MobileNet 分類');
+        classifyImage(petImage, true).catch(error => {
+          console.error('圖像分類失敗:', error);
+          addChatMessage('圖像分類失敗，請稍後再試。錯誤信息：' + error.message);
+        });
+      };
+      
+      mobileCameraButton.textContent = '開啟手機相機';
+      mobileCameraButton.removeEventListener('click', captureMobilePhoto);
+      mobileCameraButton.addEventListener('click', openMobileCamera);
+      addChatMessage('用戶使用手機相機拍攝了一張照片並進行辨識。');
+      
+      const stream = video.srcObject;
+      const tracks = stream.getTracks();
+      tracks.forEach(track => track.stop());
+    }
+
+    mobileCameraButton.addEventListener('click', openMobileCamera);
+
+    function addChatMessage(message) {
+      const chatItem = document.createElement('li');
+      chatItem.textContent = message;
+      chatHistory.appendChild(chatItem);
+    }
+
+    cameraButton.addEventListener('click', openCamera);
+
+    window.addEventListener('unhandledrejection', function(event) {
+      console.error('Unhandled rejection (promise: ', event.promise, ', reason: ', event.reason, ').');
+      addChatMessage(`發生未處理的錯誤。請刷新頁面並重試。錯誤信息：${event.reason}`);
+      alert(`發生未處理的錯誤。請刷新頁面並重試。錯誤信息：${event.reason}`);
+    });
+
+    window.addEventListener('error', function(event) {
+      console.error('捕獲到錯誤:', event.error);
+      addChatMessage(`發生錯誤。請刷新頁面並重試。錯誤信息：${event.error.message}`);
+      alert(`發生錯誤。請刷新頁面並重試。錯誤信息：${event.error.message}`);
+    });
+  </script>
+</body></html>
