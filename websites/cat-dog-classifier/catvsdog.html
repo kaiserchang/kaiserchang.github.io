@@ -254,7 +254,7 @@
         <header>
             <h1 style="font-size: 7.5vmin;">喵星人與汪星人識別器 <span class="version">v3.0</span></h1>
             <h2 style="font-size: 4vmin;">使用方法說明 [請勿使用line內建瀏覽器]</h2>
-            <p>透過拍照或上傳圖片來識別貓或狗。<br>您可以：</p>
+            <p>透過拍照或上傳圖片來識別貓或狗。<br><font color="red">請稍等模型加載完畢喔</font><br>您可以：</p>
             <table style="margin: 0 auto;">
                 <tr>
                   <td>
@@ -267,6 +267,7 @@
                   </td>
                 </tr>
               </table>
+              <div id="modelStatus">模型狀態：準備中...</div>
         </header>
         <main class="container">
             <p>目前使用預訓練的 MobileNet 模型進行識別，準確度較高。</p>
@@ -276,9 +277,6 @@
                 <button id="uploadButton">WebCam拍照或上傳圖片（電腦）</button>
                 <button id="modelButton">替換自訂模型</button>
             </div>
-
-            <div id="modelStatus">模型狀態：準備中...</div>
-
             <div id="imageFrame">
                 <p id="dragInstruction">將圖片拖曳至此或使用攝影機拍攝</p>
                 <div id="dropOverlay">放開以上傳圖片</div>
