@@ -1,0 +1,81 @@
+讓拖曳圖片到網頁範圍內時,就直接上傳圖片到圖片框並起動辨識
+
+
+這些修改解決了拖放圖片時的問題。以下是主要變更的解釋：
+
+我們為 imageFrame 和 document.body 添加了事件監聽器，以防止默認的拖放行為。
+新增了 highlight 和 unhighlight 函數，在拖放過程中提供視覺反饋。
+更新了 handleDrop 函數，使其使用 FileReader 來讀取拖放的圖片文件，然後調用 processImageData 進行處理。
+確保 processImageData 函數正確實現，它會創建一個新的 Image 對象，設置其 src，並在加載完成後調用 classifyImage。
+
+
+// 在 window.onload 函數中添加或更新以下代码
+window.onload = () => {
+    loadModel();
+    document.getElementById('cameraButton').addEventListener('click', startCamera);
+    document.getElementById('captureButton').addEventListener('click', captureImage);
+    document.getElementById('uploadButton').addEventListener('click', uploadImage);
+    document.getElementById('modelButton').addEventListener('click', replaceModel);
+
+    const imageFrame = document.getElementById('imageFrame');
+    const dropOverlay = document.getElementById('dropOverlay');
+
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        imageFrame.addEventListener(eventName, preventDefaults, false);
+        document.body.addEventListener(eventName, preventDefaults, false);
+    });
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+        imageFrame.addEventListener(eventName, highlight, false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+        imageFrame.addEventListener(eventName, unhighlight, false);
+    });
+
+    imageFrame.addEventListener('drop', handleDrop, false);
+};
+
+// 更新或添加以下函数
+function preventDefaults(e) {
+    e.preventDefault();
+    e.stopPropagation();
+}
+
+function highlight() {
+    document.getElementById('imageFrame').classList.add('drag-over');
+    document.getElementById('dropOverlay').style.display = 'flex';
+}
+
+function unhighlight() {
+    document.getElementById('imageFrame').classList.remove('drag-over');
+    document.getElementById('dropOverlay').style.display = 'none';
+}
+
+// 更新 handleDrop 函数
+function handleDrop(e) {
+    const dt = e.dataTransfer;
+    const file = dt.files[0];
+
+    if (file && file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            processImageData(event.target.result);
+        };
+        reader.readAsDataURL(file);
+    } else {
+        updateChat("請拖放有效的圖片文件。");
+    }
+}
+
+// 确保 processImageData 函数存在并正确实现
+function processImageData(imageData) {
+    const img = new Image();
+    img.onload = () => {
+        document.getElementById('imageFrame').innerHTML = '';
+        document.getElementById('imageFrame').appendChild(img);
+        classifyImage(img);
+    };
+    img.src = imageData;
+    updateChat("圖片已載入，正在進行識別...");
+}
