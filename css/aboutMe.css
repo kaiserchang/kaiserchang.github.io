@@ -11,8 +11,9 @@
 }
 
 #imageContainer {
-    position: absolute;
-    top: 50px; /* 使用固定像素值 */
+    position: fixed;
+    width: 66vmax;
+    top: 10vmin; 
     left: 50%;
     transform: translateX(-50%);
     border: 2px solid white;
