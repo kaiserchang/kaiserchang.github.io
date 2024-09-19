@@ -1,35 +1,35 @@
-// 在文檔加載完成後執行
-document.addEventListener('DOMContentLoaded', function() {
-    // 獲取canvas元素
-    const canvas = document.querySelector('canvas');
+// // 在文檔加載完成後執行
+// document.addEventListener('DOMContentLoaded', function() {
+//     // 獲取canvas元素
+//     const canvas = document.querySelector('canvas');
     
-    // 設置canvas的初始尺寸
-    function setCanvasSize() {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-    }
+//     // 設置canvas的初始尺寸
+//     function setCanvasSize() {
+//       canvas.width = window.innerWidth;
+//       canvas.height = window.innerHeight;
+//     }
     
-    // 初始設置canvas尺寸
-    setCanvasSize();
+//     // 初始設置canvas尺寸
+//     setCanvasSize();
     
-    // 監聽窗口大小變化事件
-    let resizeTimeout;
-    window.addEventListener('resize', function() {
-      // 清除之前的超時
-      clearTimeout(resizeTimeout);
+//     // 監聽窗口大小變化事件
+//     let resizeTimeout;
+//     window.addEventListener('resize', function() {
+//       // 清除之前的超時
+//       clearTimeout(resizeTimeout);
       
-      // 設置新的超時，延遲執行重置尺寸的操作
-      resizeTimeout = setTimeout(function() {
-        setCanvasSize();
-        // 如果需要，在這裡重新初始化或調整particles和cube
-      }, 250);  // 250毫秒的延遲
-    });
+//       // 設置新的超時，延遲執行重置尺寸的操作
+//       resizeTimeout = setTimeout(function() {
+//         setCanvasSize();
+//         // 如果需要，在這裡重新初始化或調整particles和cube
+//       }, 250);  // 250毫秒的延遲
+//     });
     
-    // 禁用雙指縮放
-    document.addEventListener('gesturestart', function(e) {
-      e.preventDefault();
-    });
-  });
+//     // 禁用雙指縮放
+//     document.addEventListener('gesturestart', function(e) {
+//       e.preventDefault();
+//     });
+//   });
 
 // /* 以上是優化RWD的js. */
 
