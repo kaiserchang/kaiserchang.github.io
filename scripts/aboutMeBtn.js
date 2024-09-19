@@ -4,14 +4,25 @@ const closeBtn = document.getElementById('closeBtn');
 
 showImageBtn.addEventListener('click', () => {
     imageOverlay.style.display = 'block';
+    document.body.style.overflow = 'hidden'; // Prevent scrolling on the background
 });
 
-closeBtn.addEventListener('click', () => {
-    imageOverlay.style.display = 'none';
-});
+closeBtn.addEventListener('click', closeOverlay);
 
 imageOverlay.addEventListener('click', (event) => {
     if (event.target === imageOverlay) {
-        imageOverlay.style.display = 'none';
+        closeOverlay();
+    }
+});
+
+function closeOverlay() {
+    imageOverlay.style.display = 'none';
+    document.body.style.overflow = ''; // Restore scrolling
+}
+
+// Close overlay on escape key press
+document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') {
+        closeOverlay();
     }
 });
