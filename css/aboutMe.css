@@ -7,24 +7,21 @@
     height: 100%;
     background-color: rgba(0,0,0,0.7);
     z-index: 500;
-    overflow: auto; /* 添加滚动功能，以防内容溢出 */
+    overflow: auto;
 }
 
 #imageContainer {
     position: absolute;
-    top: 10vh; /* 改为固定的顶部距离 */
+    top: 50px; /* 使用固定像素值 */
     left: 50%;
-    transform: translateX(-50%); /* 只在水平方向上居中 */
+    transform: translateX(-50%);
     border: 2px solid white;
     border-radius: 5px;
     box-shadow: 0 0 10px rgba(0,0,0,0.3);
     z-index: 750;
-    max-width: 90vw; /* 限制最大宽度 */
-    max-height: 80vh; /* 限制最大高度 */
-    display: flex; /* 使用 flex 布局 */
-    justify-content: center; /* 水平居中 */
-    align-items: center; /* 垂直居中 */
-    background-color: white; /* 添加背景色，以防图片加载慢时 */
+    background-color: white;
+    padding: 10px;
+    box-sizing: border-box;
 }
 
 #closeBtn {
@@ -43,7 +40,7 @@
     font-size: 18px;
     font-weight: bold;
     box-shadow: 0 0 5px rgba(0,0,0,0.3);
-    z-index: 1001; /* 确保关闭按钮始终在最上层 */
+    z-index: 1001;
 }
 
 #closeBtn:hover {
@@ -51,16 +48,8 @@
 }
 
 #displayedImage {
-    max-width: 100%; /* 改为100%，让图片填满容器 */
-    max-height: 100%; /* 改为100%，让图片填满容器 */
-    object-fit: contain; /* 保持图片比例 */
-    z-index: 1000;
-}
-
-@media (max-width: 768px) {
-    #imageContainer {
-        top: 5vh; /* 在小屏幕上减少顶部距离 */
-        max-width: 95vw; /* 在小屏幕上增加最大宽度 */
-        max-height: 85vh; /* 在小屏幕上增加最大高度 */
-    }
+    display: block;
+    max-width: 100%;
+    height: auto;
+    object-fit: contain;
 }
