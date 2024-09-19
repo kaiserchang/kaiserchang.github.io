@@ -24,7 +24,7 @@ const displayedImage = document.getElementById('displayedImage');
 
 function adjustImageSize() {
     const maxWidth = Math.min(window.innerWidth - 40, 800); // 最大宽度，减去边距
-    const maxHeight = window.innerHeight - 100; // 最大高度，留出顶部空间
+    const maxHeight = window.innerHeight - 50; // 最大高度，留出顶部空间
 
     // 重置容器和图片的样式
     imageContainer.style.width = 'auto';
@@ -40,8 +40,8 @@ function adjustImageSize() {
     }
 
     // 调整容器大小以适应图片
-    imageContainer.style.width = `${displayedImage.offsetWidth + 20}px`; // 加上内边距
-    imageContainer.style.height = `${displayedImage.offsetHeight + 20}px`; // 加上内边距
+    imageContainer.style.width = `${displayedImage.offsetWidth + 2}px`; // 加上内边距
+    imageContainer.style.height = `${displayedImage.offsetHeight + 2}px`; // 加上内边距
 
     // 确保容器居中
     imageContainer.style.left = '50%';
