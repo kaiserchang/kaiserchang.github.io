@@ -18,7 +18,7 @@
     border: 2px solid white; /* 添加 2px 的白色邊框 */
     border-radius: 5px;
     box-shadow: 0 0 10px rgba(0,0,0,0.3);
-    z-index: 1000;
+    z-index: 500;
 }
 #closeBtn {
     position: absolute;
@@ -44,4 +44,20 @@
     max-width: 90vw;
     max-height: 80vh;
     z-index: 1001;
+}
+
+/* 添加RWD設定 */
+@media (max-width: 768px) {
+    #imageContainer {
+        max-width: 80vw; /* 對於小螢幕，最大寬度設定為80vw */
+    }
+}
+
+@media (max-width: 480px) {
+    #imageContainer {
+        max-width: 90vw; /* 對於超小螢幕，最大寬度設定為90vw */
+    }
+    #closeBtn {
+        font-size: 14px; /* 對於超小螢幕，關閉按鈕字體大小設定為14px */
+    }
 }

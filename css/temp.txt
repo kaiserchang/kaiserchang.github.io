@@ -1,4 +1,3 @@
-
 /* 設置容器樣式 */
 .container {
     position: fixed;
@@ -26,7 +25,6 @@
     cursor: grab; /* 設定游標為抓取型 */
     
 }
-
 
 /* 設置Logo內部立方體樣式 */
 .cube {
@@ -58,7 +56,6 @@
     will-change: transform;
 }
 
-
 /* 設置立方體每個面的位置，調整以增強透視效果 */
 .front  { transform: rotateY(0deg) translateZ(14.14vmin); }  /* 17.68vmin * 0.8 */
 .back   { transform: rotateY(180deg) translateZ(14.14vmin); }
@@ -70,7 +67,7 @@
 /* 設置粒子樣式 */
 .particle {
     position: absolute;
-    background-color: rgba(255, 255, 255, 0.7);
+    background-color: rgba(255, 255, 255, 0.5);
     border-radius: 50%;
     transition: transform 0.5s ease-out;
 }
@@ -87,25 +84,23 @@
     height: 5px;
 }
 
-
 /* RWD設定 */
 @media (max-width: 768px) {
-    .face {
-         font-size: 3vmin;  /* 2vmin * 1.5 */
-     }
-    .logo {
-         width: 25vmin;  /* 35.36vmin * 0.8 */
-         height: 25vmin;  /* 35.36vmin * 0.8 */
-     }
- }
- 
- @media (max-width: 480px) {
-    .face {
-         font-size: 2.7vmin;  /* 1.8vmin * 1.5 */
-     }
-    .logo {
-         width: 22vmin;  /* 35.36vmin * 0.8 */
-         height: 22vmin;  /* 35.36vmin * 0.8 */
-     }
- }
+   .face {
+        font-size: 3vmin;  /* 2vmin * 1.5 */
+    }
+   .logo {
+        width: 25vmin;  /* 35.36vmin * 0.8 */
+        height: 25vmin;  /* 35.36vmin * 0.8 */
+    }
+}
 
+@media (max-width: 480px) {
+   .face {
+        font-size: 2.7vmin;  /* 1.8vmin * 1.5 */
+    }
+   .logo {
+        width: 22vmin;  /* 35.36vmin * 0.8 */
+        height: 22vmin;  /* 35.36vmin * 0.8 */
+    }
+}
