@@ -88,24 +88,5 @@
 }
 
 
-/* RWD設定 */
-@media (max-width: 768px) {
-    .face {
-         font-size: 3vmin;  /* 2vmin * 1.5 */
-     }
-    .logo {
-         width: 25vmin;  /* 35.36vmin * 0.8 */
-         height: 25vmin;  /* 35.36vmin * 0.8 */
-     }
- }
- 
- @media (max-width: 480px) {
-    .face {
-         font-size: 2.7vmin;  /* 1.8vmin * 1.5 */
-     }
-    .logo {
-         width: 22vmin;  /* 35.36vmin * 0.8 */
-         height: 22vmin;  /* 35.36vmin * 0.8 */
-     }
- }
+
 

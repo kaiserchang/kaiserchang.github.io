@@ -46,18 +46,3 @@
     z-index: 1001;
 }
 
-/* 添加RWD設定 */
-@media (max-width: 768px) {
-    #imageContainer {
-        max-width: 80vw; /* 對於小螢幕，最大寬度設定為80vw */
-    }
-}
-
-@media (max-width: 480px) {
-    #imageContainer {
-        max-width: 90vw; /* 對於超小螢幕，最大寬度設定為90vw */
-    }
-    #closeBtn {
-        font-size: 14px; /* 對於超小螢幕，關閉按鈕字體大小設定為14px */
-    }
-}
