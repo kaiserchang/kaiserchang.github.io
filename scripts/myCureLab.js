@@ -19,6 +19,10 @@ const animals = [
   { src: "img/colab_cute/chocolatechip.gif", alt: "吉祥物chocolatechip" },
   { src: "img/colab_cute/redvelvet.gif", alt: "吉祥物redvelvet" },
   { src: "img/colab_cute/oreo2.gif", alt: "吉祥物oreo2" },
+  { src: "img/colab_cute/GHOSTPUFFS.gif", alt: "吉祥物GHOSTPUFFS" },
+  { src: "img/colab_cute/PUMPKINSPICELATTE.gif", alt: "吉祥物PUMPKINSPICELATTE" },
+  { src: "img/colab_cute/xX_vampiregoth91_Xx.gif", alt: "吉祥物xX_vampiregoth91_Xx" },
+  { src: "img/colab_cute/halloween_chocolatechip.gif", alt: "吉祥物halloween_chocolatechip" },
 ];
 
 function shuffleArray(array) {
